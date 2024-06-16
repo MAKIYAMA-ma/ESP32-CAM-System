@@ -6,6 +6,7 @@
   Modification: 2021/12/01
 **********************************************************************/
 #include "esp_camera.h"
+#include "esp_timer.h"
 #include "sd_read_write.h"
 #include "SD_MMC.h"
 #include <WiFi.h>
@@ -109,27 +110,32 @@ void setup() {
 
     removeDir(SD_MMC, "/mydir");
     listDir(SD_MMC, "/", 2);
-
-    // Sample bin data
-    uint8_t dummy_data[] = {0x12, 0x34, 0xAB, 0xEF};
-    writeBinFile(SD_MMC, "/test.bin", dummy_data, sizeof(dummy_data));
-    readFile(SD_MMC, "/test.bin");
-
-    uint8_t *buf = NULL;
-    size_t data_size = 0;
-
-    if(camera_capture(&buf, &data_size) == ESP_OK) {
-        Serial.printf("Captured[%d][%d Bytes]\n", buf, data_size);
-        writeBinFile(SD_MMC, "/capture.jpg", buf, data_size);
-        readFile(SD_MMC, "/capture.jpg");
-        free(buf);
-    } else {
-        Serial.printf("Fail to capture\n");
-    }
 }
 
 void loop() {
-  ;
+    static int64_t latest_time = esp_timer_get_time();
+    int64_t i;
+    static int64_t snap_cnt = 0;
+
+    for(i = 0; i < 1000000; i++);   // aren't there wait function?
+    int64_t current_time = esp_timer_get_time();
+    if(((current_time - latest_time) / 1000) > (10*1000)) {
+        uint8_t *buf = NULL;
+        size_t data_size = 0;
+
+        latest_time = current_time;
+
+        if(camera_capture(&buf, &data_size) == ESP_OK) {
+            Serial.printf("Captured[%d][%d Bytes]\n", snap_cnt, data_size);
+            char filename[32] = "";
+            sprintf(filename, "/capture_%d.jpg", snap_cnt);
+            writeBinFile(SD_MMC, filename, buf, data_size);
+            free(buf);
+            snap_cnt++;
+        } else {
+            Serial.printf("Fail to capture\n");
+        }
+    }
 }
 
 void config_init() {
