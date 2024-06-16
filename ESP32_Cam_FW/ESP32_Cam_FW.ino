@@ -9,6 +9,7 @@
 #include "sd_read_write.h"
 #include "SD_MMC.h"
 #include <WiFi.h>
+#include <stdlib.h>
 
 // ===================
 // Select camera model
@@ -34,6 +35,7 @@
 
 #include "camera_pins.h"
 #include "wifi_setting.h"
+#include "camera_app.h"
 
 camera_config_t config;
 
@@ -112,6 +114,18 @@ void setup() {
     uint8_t dummy_data[] = {0x12, 0x34, 0xAB, 0xEF};
     writeBinFile(SD_MMC, "/test.bin", dummy_data, sizeof(dummy_data));
     readFile(SD_MMC, "/test.bin");
+
+    uint8_t *buf = NULL;
+    size_t data_size = 0;
+
+    if(camera_capture(&buf, &data_size) == ESP_OK) {
+        Serial.printf("Captured[%d][%d Bytes]\n", buf, data_size);
+        writeBinFile(SD_MMC, "/capture.jpg", buf, data_size);
+        readFile(SD_MMC, "/capture.jpg");
+        free(buf);
+    } else {
+        Serial.printf("Fail to capture\n");
+    }
 }
 
 void loop() {
