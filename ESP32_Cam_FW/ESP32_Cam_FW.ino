@@ -6,6 +6,8 @@
   Modification: 2021/12/01
 **********************************************************************/
 #include "esp_camera.h"
+#include "sd_read_write.h"
+#include "SD_MMC.h"
 #include <WiFi.h>
 
 // ===================
@@ -26,6 +28,9 @@
 //#define CAMERA_MODEL_ESP32S2_CAM_BOARD
 //#define CAMERA_MODEL_ESP32S3_CAM_LCD
 
+#define SD_MMC_CMD 15 //Please do not modify it.
+#define SD_MMC_CLK 14 //Please do not modify it. 
+#define SD_MMC_D0  2  //Please do not modify it.
 
 #include "camera_pins.h"
 #include "wifi_setting.h"
@@ -36,38 +41,77 @@ void startCameraServer();
 void config_init();
 
 void setup() {
-  Serial.begin(115200);
-  Serial.setDebugOutput(true);
-  Serial.println();
+    Serial.begin(115200);
+    Serial.setDebugOutput(true);
+    Serial.println();
 
-  config_init();
+    config_init();
 
-  // camera init
-  esp_err_t err = esp_camera_init(&config);
-  if (err != ESP_OK) {
-    Serial.printf("Camera init failed with error 0x%x", err);
-    return;
-  }
+    // camera init
+    esp_err_t err = esp_camera_init(&config);
+    if (err != ESP_OK) {
+        Serial.printf("Camera init failed with error 0x%x", err);
+        return;
+    }
 
-  sensor_t * s = esp_camera_sensor_get();
-  s->set_vflip(s, 0);        //1-Upside down, 0-No operation
-  s->set_hmirror(s, 0);      //1-Reverse left and right, 0-No operation
-  s->set_brightness(s, 1);   //up the blightness just a bit
-  s->set_saturation(s, -1);  //lower the saturation
+    sensor_t * s = esp_camera_sensor_get();
+    s->set_vflip(s, 0);        //1-Upside down, 0-No operation
+    s->set_hmirror(s, 0);      //1-Reverse left and right, 0-No operation
+    s->set_brightness(s, 1);   //up the blightness just a bit
+    s->set_saturation(s, -1);  //lower the saturation
 
-  WiFi.begin(ssid_Router, password_Router);
-  while (WiFi.isConnected() != true) {
-    delay(500);
-    Serial.print(".");
-  }
-  Serial.println("");
-  Serial.println("WiFi connected");
+    WiFi.begin(ssid_Router, password_Router);
+    while (WiFi.isConnected() != true) {
+        delay(500);
+        Serial.print(".");
+    }
+    Serial.println("");
+    Serial.println("WiFi connected");
 
-  startCameraServer();
+    startCameraServer();
 
-  Serial.print("Camera Ready! Use 'http://");
-  Serial.print(WiFi.localIP());
-  Serial.println("' to connect");
+    Serial.print("Camera Ready! Use 'http://");
+    Serial.print(WiFi.localIP());
+    Serial.println("' to connect");
+
+    // SD Card initialize
+    SD_MMC.setPins(SD_MMC_CLK, SD_MMC_CMD, SD_MMC_D0);
+    if (!SD_MMC.begin("/sdcard", true, true, SDMMC_FREQ_DEFAULT, 5)) {
+        Serial.println("Card Mount Failed");
+        return;
+    }
+    uint8_t cardType = SD_MMC.cardType();
+    if(cardType == CARD_NONE){
+        Serial.println("No SD_MMC card attached");
+        return;
+    }
+
+    Serial.print("SD_MMC Card Type: ");
+    if(cardType == CARD_MMC){
+        Serial.println("MMC");
+    } else if(cardType == CARD_SD){
+        Serial.println("SDSC");
+    } else if(cardType == CARD_SDHC){
+        Serial.println("SDHC");
+    } else {
+        Serial.println("UNKNOWN");
+    }
+
+    uint64_t cardSize = SD_MMC.cardSize() / (1024 * 1024);
+    Serial.printf("SD_MMC Card Size: %lluMB\n", cardSize);
+
+    listDir(SD_MMC, "/", 0);
+
+    createDir(SD_MMC, "/mydir");
+    listDir(SD_MMC, "/", 0);
+
+    removeDir(SD_MMC, "/mydir");
+    listDir(SD_MMC, "/", 2);
+
+    // Sample bin data
+    uint8_t dummy_data[] = {0x12, 0x34, 0xAB, 0xEF};
+    writeBinFile(SD_MMC, "/test.bin", dummy_data, sizeof(dummy_data));
+    readFile(SD_MMC, "/test.bin");
 }
 
 void loop() {
