@@ -9,6 +9,7 @@
 #include "esp_timer.h"
 #include "sd_read_write.h"
 #include "SD_MMC.h"
+#include "mqtt.h"
 #include <WiFi.h>
 #include <stdlib.h>
 
@@ -35,12 +36,11 @@
 #define SD_MMC_D0  2  //Please do not modify it.
 
 #include "camera_pins.h"
-#include "wifi_setting.h"
 #include "camera_app.h"
 
 camera_config_t config;
 
-void startCameraServer();
+//void startCameraServer();
 void config_init();
 
 void setup() {
@@ -63,19 +63,19 @@ void setup() {
     s->set_brightness(s, 1);   //up the blightness just a bit
     s->set_saturation(s, -1);  //lower the saturation
 
-    WiFi.begin(ssid_Router, password_Router);
-    while (WiFi.isConnected() != true) {
-        delay(500);
-        Serial.print(".");
-    }
-    Serial.println("");
-    Serial.println("WiFi connected");
+    //WiFi.begin(ssid_Router, password_Router);
+    //while (WiFi.isConnected() != true) {
+    //    delay(500);
+    //    Serial.print(".");
+    //}
+    //Serial.println("");
+    //Serial.println("WiFi connected");
 
-    startCameraServer();
+    //startCameraServer();
 
-    Serial.print("Camera Ready! Use 'http://");
-    Serial.print(WiFi.localIP());
-    Serial.println("' to connect");
+    //Serial.print("Camera Ready! Use 'http://");
+    //Serial.print(WiFi.localIP());
+    //Serial.println("' to connect");
 
     // SD Card initialize
     SD_MMC.setPins(SD_MMC_CLK, SD_MMC_CMD, SD_MMC_D0);
@@ -110,6 +110,9 @@ void setup() {
 
     removeDir(SD_MMC, "/mydir");
     listDir(SD_MMC, "/", 2);
+
+    // MQTT
+    mqtt_init();
 }
 
 void loop() {
@@ -136,6 +139,8 @@ void loop() {
             Serial.printf("Fail to capture\n");
         }
     }
+
+    mqtt_task();
 }
 
 void config_init() {
