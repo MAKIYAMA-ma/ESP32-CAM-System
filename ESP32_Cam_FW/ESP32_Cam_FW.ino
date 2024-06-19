@@ -13,6 +13,8 @@
 #include <WiFi.h>
 #include <stdlib.h>
 
+#undef SAVE_IMAGE_TO_SDCARD
+
 // ===================
 // Select camera model
 // ===================
@@ -42,6 +44,9 @@ camera_config_t config;
 
 //void startCameraServer();
 void config_init();
+#ifdef SAVE_IMAGE_TO_SDCARD
+static void sdcard_init(void);
+#endif
 
 void setup() {
     Serial.begin(115200);
@@ -63,53 +68,26 @@ void setup() {
     s->set_brightness(s, 1);   //up the blightness just a bit
     s->set_saturation(s, -1);  //lower the saturation
 
-    //WiFi.begin(ssid_Router, password_Router);
-    //while (WiFi.isConnected() != true) {
-    //    delay(500);
-    //    Serial.print(".");
-    //}
-    //Serial.println("");
-    //Serial.println("WiFi connected");
-
-    //startCameraServer();
-
-    //Serial.print("Camera Ready! Use 'http://");
-    //Serial.print(WiFi.localIP());
-    //Serial.println("' to connect");
-
-    // SD Card initialize
-    SD_MMC.setPins(SD_MMC_CLK, SD_MMC_CMD, SD_MMC_D0);
-    if (!SD_MMC.begin("/sdcard", true, true, SDMMC_FREQ_DEFAULT, 5)) {
-        Serial.println("Card Mount Failed");
-        return;
+#if 0
+    // Camera Server
+    WiFi.begin(ssid_Router, password_Router);
+    while (WiFi.isConnected() != true) {
+        delay(500);
+        Serial.print(".");
     }
-    uint8_t cardType = SD_MMC.cardType();
-    if(cardType == CARD_NONE){
-        Serial.println("No SD_MMC card attached");
-        return;
-    }
+    Serial.println("");
+    Serial.println("WiFi connected");
 
-    Serial.print("SD_MMC Card Type: ");
-    if(cardType == CARD_MMC){
-        Serial.println("MMC");
-    } else if(cardType == CARD_SD){
-        Serial.println("SDSC");
-    } else if(cardType == CARD_SDHC){
-        Serial.println("SDHC");
-    } else {
-        Serial.println("UNKNOWN");
-    }
+    startCameraServer();
 
-    uint64_t cardSize = SD_MMC.cardSize() / (1024 * 1024);
-    Serial.printf("SD_MMC Card Size: %lluMB\n", cardSize);
+    Serial.print("Camera Ready! Use 'http://");
+    Serial.print(WiFi.localIP());
+    Serial.println("' to connect");
+#endif
 
-    listDir(SD_MMC, "/", 0);
-
-    createDir(SD_MMC, "/mydir");
-    listDir(SD_MMC, "/", 0);
-
-    removeDir(SD_MMC, "/mydir");
-    listDir(SD_MMC, "/", 2);
+#ifdef SAVE_IMAGE_TO_SDCARD
+    sdcard_init();
+#endif
 
     // MQTT
     mqtt_init();
@@ -132,7 +110,9 @@ void loop() {
             Serial.printf("Captured[%d][%d Bytes]\n", snap_cnt, data_size);
             char filename[32] = "";
             sprintf(filename, "/capture_%d.jpg", snap_cnt);
+#ifdef SAVE_IMAGE_TO_SDCARD
             writeBinFile(SD_MMC, filename, buf, data_size);
+#endif
             pub_image(buf, data_size);
             free(buf);
             snap_cnt++;
@@ -172,3 +152,42 @@ void config_init() {
   config.jpeg_quality = 12;
   config.fb_count = 1;
 }
+
+#ifdef SAVE_IMAGE_TO_SDCARD
+static void sdcard_init(void)
+{
+    // SD Card initialize
+    SD_MMC.setPins(SD_MMC_CLK, SD_MMC_CMD, SD_MMC_D0);
+    if (!SD_MMC.begin("/sdcard", true, true, SDMMC_FREQ_DEFAULT, 5)) {
+        Serial.println("Card Mount Failed");
+        return;
+    }
+    uint8_t cardType = SD_MMC.cardType();
+    if(cardType == CARD_NONE){
+        Serial.println("No SD_MMC card attached");
+        return;
+    }
+
+    Serial.print("SD_MMC Card Type: ");
+    if(cardType == CARD_MMC){
+        Serial.println("MMC");
+    } else if(cardType == CARD_SD){
+        Serial.println("SDSC");
+    } else if(cardType == CARD_SDHC){
+        Serial.println("SDHC");
+    } else {
+        Serial.println("UNKNOWN");
+    }
+
+    uint64_t cardSize = SD_MMC.cardSize() / (1024 * 1024);
+    Serial.printf("SD_MMC Card Size: %lluMB\n", cardSize);
+
+    listDir(SD_MMC, "/", 0);
+
+    createDir(SD_MMC, "/mydir");
+    listDir(SD_MMC, "/", 0);
+
+    removeDir(SD_MMC, "/mydir");
+    listDir(SD_MMC, "/", 2);
+}
+#endif

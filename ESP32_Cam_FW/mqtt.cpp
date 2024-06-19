@@ -56,8 +56,8 @@ void mqtt_init()
     }
 
     // test
-    client.publish(topic, "Hello world from ESP32");
-    client.subscribe(topic);
+    // client.publish(topic, "Hello world from ESP32");
+    // client.subscribe(topic);
 }
 
 static void callback(char *topic, byte *payload, unsigned int length)
