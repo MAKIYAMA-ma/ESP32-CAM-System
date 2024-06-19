@@ -1,5 +1,6 @@
 # coding: UTF-8
 import paho.mqtt.client as mqtt
+from datetime import datetime
 
 
 host = '192.168.0.8'  # MQTT Broker
@@ -18,10 +19,13 @@ def on_connect(client, userdata, flags, respons_code):
 # 受信したバイナリデータを output.jpg として保存する関数
 def on_message(client, userdata, msg):
     global image_index
-    print('new img')
-    outfile = open('./capture_' + str(image_index) + '.jpg', 'wb')
+
+    filename = './' + datetime.now().strftime("%Y%m%d_%H%M%S") + '.jpg'
+
+    outfile = open(filename, 'wb')
     outfile.write(msg.payload)
     outfile.close
+    print(filename + " is saved")
     image_index = image_index + 1
 
 
