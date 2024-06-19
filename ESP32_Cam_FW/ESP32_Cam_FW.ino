@@ -133,6 +133,7 @@ void loop() {
             char filename[32] = "";
             sprintf(filename, "/capture_%d.jpg", snap_cnt);
             writeBinFile(SD_MMC, filename, buf, data_size);
+            pub_image(buf, data_size);
             free(buf);
             snap_cnt++;
         } else {

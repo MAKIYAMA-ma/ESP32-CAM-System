@@ -2,6 +2,8 @@
 #include <PubSubClient.h>
 #include "wifi_setting.h"
 
+// #define MQTT_MAX_PACKET_SIZE 8192
+
 static void callback(char *topic, byte *payload, unsigned int length);
 
 // MQTTブローカー
@@ -28,6 +30,7 @@ void mqtt_init()
     // MQTTブローカーへの接続
     client.setServer(mqtt_broker, mqtt_port);
     client.setCallback(callback);
+    client.setBufferSize(8192);
     while (!client.connected()) {
         String client_id = "esp32-client-";
         client_id += String(WiFi.macAddress());
@@ -67,6 +70,20 @@ static void callback(char *topic, byte *payload, unsigned int length)
   }
   Serial.println();
   Serial.println("-----------------------");
+}
+
+void pub_image(const byte *image_data, unsigned int length)
+{
+    Serial.print("len:");
+    Serial.println(length);
+    // TODO publishのデータ量を上げたい 画像のサイズだと送れない
+    boolean result = client.publish(topic, image_data, length);
+    //boolean result = client.publish(topic, image_data, 30);
+    if(result) {
+        Serial.println("pub success");
+    } else {
+        Serial.println("pub fail");
+    }
 }
 
 void mqtt_task(void)
