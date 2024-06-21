@@ -62,23 +62,21 @@ void mqtt_init()
 
 static void callback(char *topic, byte *payload, unsigned int length)
 {
-  Serial.print("Message is received:");
-  Serial.println(topic);
-  Serial.print("Payload:");
-  for (int i = 0; i < length; i++) {
-    Serial.print((char)payload[i]);
-  }
-  Serial.println();
-  Serial.println("-----------------------");
+    Serial.print("Message is received:");
+    Serial.println(topic);
+    Serial.print("Payload:");
+    for (int i = 0; i < length; i++) {
+        Serial.print((char)payload[i]);
+    }
+    Serial.println();
+    Serial.println("-----------------------");
 }
 
 void pub_image(const byte *image_data, unsigned int length)
 {
     Serial.print("len:");
     Serial.println(length);
-    // TODO publishのデータ量を上げたい 画像のサイズだと送れない
     boolean result = client.publish(topic, image_data, length);
-    //boolean result = client.publish(topic, image_data, 30);
     if(result) {
         Serial.println("pub success");
     } else {
