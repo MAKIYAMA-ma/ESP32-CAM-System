@@ -100,7 +100,8 @@ void loop() {
 
     for(i = 0; i < 1000000; i++);   // aren't there wait function?
     int64_t current_time = esp_timer_get_time();
-    if(((current_time - latest_time) / 1000) > (10*1000)) {
+    if(((current_time - latest_time) / 1000) > (3*1000)) {
+    //if(((current_time - latest_time) / 1000) > (10*1000)) {
         uint8_t *buf = NULL;
         size_t data_size = 0;
 
