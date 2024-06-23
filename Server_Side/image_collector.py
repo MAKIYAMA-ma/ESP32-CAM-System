@@ -53,7 +53,14 @@ def google_search_result(key: str, num: int):
             new_height = driver.execute_script("return document.body.scrollHeight")
 
             # get img list
-            img_elements = driver.find_elements(By.TAG_NAME, 'img')
+
+            # クラスAを持ち、クラスBを持たない要素を検索するXPath
+            xpath_query = "//*[contains(@class, 'YQ4gaf') and not(contains(@class, 'zr758c'))]"
+
+            # 要素を検索
+            img_elements = driver.find_elements(By.XPATH, xpath_query)
+            # img_elements = driver.find_elements(By.CLASS_NAME, 'YQ4gaf')
+            # img_elements = driver.find_elements(By.TAG_NAME, 'img')
             # print(len(img_elements))
 
             # imgタグごとに処理
@@ -73,7 +80,8 @@ def google_search_result(key: str, num: int):
                 # src属性がBase64形式か確認
                 # if img_src and img_src.startswith('data:image/'):
                 if img_src:
-                    if img_src.startswith('data:image/jpeg;base64,'):
+                    # if img_src.startswith('data:image/'):
+                    if img_src.startswith('data:image/jpeg;base64,') or img_src.startswith('data:image/png;base64,'):
                         # print(img_src)
                         # Base64部分を抽出
                         base64_data = img_src.split(',')[1]
