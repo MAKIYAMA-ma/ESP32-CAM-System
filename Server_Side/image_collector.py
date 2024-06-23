@@ -2,6 +2,7 @@ import time
 import sys
 import os
 import base64
+import requests
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
@@ -53,7 +54,7 @@ def google_search_result(key: str, num: int):
 
             # get img list
             img_elements = driver.find_elements(By.TAG_NAME, 'img')
-            print(len(img_elements))
+            # print(len(img_elements))
 
             # imgタグごとに処理
             idx = 0
@@ -61,33 +62,53 @@ def google_search_result(key: str, num: int):
                 # src属性を取得
                 img_src = img_element.get_attribute('src')
                 if img_src is None:
-                    print("None" + str(idx))
+                    # print("None" + str(idx))
                     idx = idx+1
                     continue
                 if img_src in seen_srcs:
-                    print("Known" + str(idx))
+                    # print("Known" + str(idx))
                     idx = idx+1
                     continue
 
                 # src属性がBase64形式か確認
-                print(img_src)
-                # if img_src and img_src.startswith('data:image/jpeg;base64,'):
-                if img_src and img_src.startswith('data:image/'):
-                    # Base64部分を抽出
-                    base64_data = img_src.split(',')[1]
-                    img_format = img_src.split(';')[0].split('/')[1]
+                # if img_src and img_src.startswith('data:image/'):
+                if img_src:
+                    if img_src.startswith('data:image/jpeg;base64,'):
+                        # print(img_src)
+                        # Base64部分を抽出
+                        base64_data = img_src.split(',')[1]
+                        img_format = img_src.split(';')[0].split('/')[1]
 
-                    # Base64デコード
-                    img_data = base64.b64decode(base64_data)
+                        # Base64デコード
+                        img_data = base64.b64decode(base64_data)
 
-                    # 画像を保存
-                    file_path = os.path.join(output_dir, f'image_{img_cnt}.{img_format}')
-                    seen_srcs.add(img_src)
-                    img_cnt = img_cnt + 1
-                    with open(file_path, 'wb') as file:
-                        file.write(img_data)
+                        # 画像を保存
+                        # file_path = os.path.join(output_dir, f'image_{img_cnt}.jpg')
+                        file_path = os.path.join(output_dir, f'image_{img_cnt}.{img_format}')
+                        seen_srcs.add(img_src)
+                        img_cnt = img_cnt + 1
+                        with open(file_path, 'wb') as file:
+                            file.write(img_data)
+                        print(f'Saved(data) {file_path}')
 
-                    print(f'Saved {file_path}')
+                        if img_cnt > num:
+                            break
+                    elif img_src.startswith('http'):
+                        try:
+                            response = requests.get(img_src)
+                            if response.status_code == 200:
+                                file_path = os.path.join(output_dir, f'image_{img_cnt}.jpg')
+                                seen_srcs.add(img_src)
+                                img_cnt = img_cnt + 1
+                                with open(file_path, 'wb') as file:
+                                    file.write(response.content)
+                                print(f'Saved(url) {file_path}')
+
+                                if img_cnt > num:
+                                    break
+                        except Exception as e:
+                            print(f"Could not download {img_src}: {e}")
+                        pass
                 # else:
                 #     print(f'Skipped img tag {img_cnt}, src attribute is not in Base64 format.')
 
