@@ -34,14 +34,12 @@ class mqtt_task:
         filepath = dirname + '/' + filename
 
         os.makedirs(dirname, exist_ok=True)
-
         outfile = open(filepath, 'wb')
         outfile.write(msg.payload)
         outfile.close
         print(filename + " is saved")
 
         self.queue.put(filepath, timeout=1)
-
         self.image_index = self.image_index + 1
 
     def run(self):
@@ -131,10 +129,10 @@ class face_analyze_task:
             pass
 
 
-if __name__ == '__main__':
-    queue = queue.Queue()
-    taskm = mqtt_task(queue)
-    taskf = face_analyze_task(queue)
+def main():
+    image_queue = queue.Queue()
+    taskm = mqtt_task(image_queue)
+    taskf = face_analyze_task(image_queue)
 
     mqtt_thread = Thread(target=taskm.run)
     mqtt_thread.daemon = True
@@ -146,3 +144,7 @@ if __name__ == '__main__':
 
     while True:
         pass
+
+
+if __name__ == '__main__':
+    main()
