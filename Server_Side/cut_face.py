@@ -114,17 +114,20 @@ def imwrite(filename, img, params=None):
         return False
 
 
+def main(dir_path: str):
+    file_list = list_files(dir_path)
+
+    if file_list:
+        for file in file_list:
+            face_location(dir_path, file)
+    else:
+        print("No files found in the directory or an error occurred.")
+
+
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         print("Usage: python script.py <directory_path>")
         sys.exit(1)
 
     directory_path = sys.argv[1]
-    directory_path = directory_path.encode('utf-8').decode('utf-8')
-    file_list = list_files(directory_path)
-
-    if file_list:
-        for file in file_list:
-            face_location(directory_path, file)
-    else:
-        print("No files found in the directory or an error occurred.")
+    main(directory_path)

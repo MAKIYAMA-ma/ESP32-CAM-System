@@ -16,7 +16,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 # @param str searching key
 #
 # @return result
-def google_search_result(key: str, num: int):
+def main(key: str, num: int):
     try:
         options = webdriver.EdgeOptions()
         options.add_argument('--headless')
@@ -141,4 +141,4 @@ if __name__ == '__main__':
     if 3 <= len(args):
         num = int(args[2])
 
-    google_search_result(key, num)
+    main(key, num)
