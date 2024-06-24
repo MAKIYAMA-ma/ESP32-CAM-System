@@ -1,6 +1,7 @@
 import insightface
 import numpy as np
 import PIL.Image
+import sys
 
 
 def read_image(file_path):
@@ -19,11 +20,11 @@ def main(img1: str, img3:str):
     face_analysis = insightface.app.FaceAnalysis()
     face_analysis.prepare(ctx_id=0, det_size=(640, 640))
 
-    image1 = read_image("img1")
+    image1 = read_image(img1)
     faces1 = face_analysis.get(image1)
     embedding1 = faces1[0].embedding
 
-    image2 = read_image("img2")
+    image2 = read_image(img2)
     faces2 = face_analysis.get(image2)
     embedding2 = faces2[0].embedding
 
