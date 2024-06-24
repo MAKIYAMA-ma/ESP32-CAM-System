@@ -2,6 +2,7 @@
 import os
 import sys
 import cv2
+import numpy
 
 
 def face_location(dirpath: str, filename: str):
@@ -12,7 +13,8 @@ def face_location(dirpath: str, filename: str):
     # cv2.IMREAD_COLOR	画像をカラー(RGB)で読込む。 引数のデフォルト値。
     # cv2.IMREAD_GRAYSCALE	画像をグレースケールで読込む。
     # cv2.IMREAD_UNCHANGED	画像を RGB に透過度を加えた RGBA で読込む。
-    input_image = cv2.imread(os.path.join(dirpath, filename), cv2.IMREAD_UNCHANGED)
+    # input_image = cv2.imread(os.path.join(dirpath, filename), cv2.IMREAD_UNCHANGED)
+    input_image = imread(os.path.join(dirpath, filename), flags=cv2.IMREAD_UNCHANGED)
 
     # Haar 特徴ベースのカスケード分類器による物体検出の準備
     # 顔検出用のカスケード分類器を使用
@@ -49,7 +51,9 @@ def face_location(dirpath: str, filename: str):
             output_image_path = os.path.join(output_dir, output_file_name)
             face_cnt = face_cnt + 1
             output_image = input_image[y:y+h, x:x+w]
-            cv2.imwrite(output_image_path, output_image)
+            print(output_image_path)
+            imwrite(output_image_path, output_image)
+            # cv2.imwrite(output_image_path, output_image)
 
 
 def list_files(directory):
@@ -64,6 +68,50 @@ def list_files(directory):
     except Exception as e:
         print(f"An error occurred: {e}")
         return []
+
+
+##
+# @brief WorkAround API to use instead of cv2.imread
+# because an error occurs if file path include Japanese
+#
+# @param filename
+# @param flags flags to pass for OpenCV
+# @param dtype
+#
+# @return image file
+def imread(filename, flags=cv2.IMREAD_COLOR, dtype=numpy.uint8):
+    try:
+        n = numpy.fromfile(filename, dtype)
+        img = cv2.imdecode(n, flags)
+        return img
+    except Exception as e:
+        print(e)
+        return None
+
+
+##
+# @brief WorkAround API to use instead of cv2.imread
+# because an fail to write if file path include Japanese
+#
+# @param filename
+# @param img
+# @param params
+#
+# @return 
+def imwrite(filename, img, params=None):
+    try:
+        ext = os.path.splitext(filename)[1]
+        result, n = cv2.imencode(ext, img, params)
+
+        if result:
+            with open(filename, mode='w+b') as f:
+                n.tofile(f)
+            return True
+        else:
+            return False
+    except Exception as e:
+        print(e)
+        return False
 
 
 if __name__ == "__main__":
