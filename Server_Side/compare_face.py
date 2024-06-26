@@ -10,10 +10,7 @@ def compute_sim(feat1, feat2):
     return numpy.dot(feat1, feat2) / (numpy.linalg.norm(feat1) * numpy.linalg.norm(feat2))
 
 
-def get_sim(img1: str, img2:str):
-    face_analysis = insightface.app.FaceAnalysis()
-    face_analysis.prepare(ctx_id=0, det_size=(640, 640))
-
+def get_sim_with_fa(face_analysis, img1: str, img2: str):
     image1 = util.cv2_imread(img1, cv2.IMREAD_UNCHANGED)
     faces1 = face_analysis.get(image1)
     if len(faces1) == 0:
@@ -31,7 +28,18 @@ def get_sim(img1: str, img2:str):
     return compute_sim(embedding1, embedding2)
 
 
-def main(img1: str, img2:str):
+def create_face_analysis():
+    face_analysis = insightface.app.FaceAnalysis()
+    face_analysis.prepare(ctx_id=0, det_size=(640, 640))
+
+    return face_analysis
+
+
+def get_sim(img1: str, img2: str):
+    return get_sim_with_fa(create_face_analysis(), img1, img2)
+
+
+def main(img1: str, img2: str):
     print("[" + img1 + " x " + img2 + "]:" + str(get_sim(img1, img2)))
 
 
