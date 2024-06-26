@@ -5,3 +5,4 @@ Server_Side/Data
 Server_Side/result
 Server_Side/sample
 Server_Side/register
+Server_Side/email_setting.py
