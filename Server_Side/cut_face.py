@@ -126,7 +126,7 @@ def main(dir_path: str):
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print("Usage: python script.py <directory_path>")
+        print("Usage: python cut_face.py <directory_path>")
         sys.exit(1)
 
     directory_path = sys.argv[1]

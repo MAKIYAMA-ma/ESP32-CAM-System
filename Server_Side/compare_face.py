@@ -45,7 +45,7 @@ def main(img1: str, img2: str):
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
-        print("Usage: python script.py <image1 path> <image2 path>")
+        print("Usage: python compare_face.py <image1 path> <image2 path>")
         sys.exit(1)
 
     image1 = sys.argv[1]

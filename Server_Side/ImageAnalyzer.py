@@ -22,7 +22,6 @@ class mqtt_task:
     def __init__(self, queue):
         self.queue = queue
 
-    # MQTT Brokerへの接続する関数
     def on_connect(self, client, userdata, flags, respons_code):
         print('status {0}'.format(respons_code))
         client.subscribe(self.topic)
