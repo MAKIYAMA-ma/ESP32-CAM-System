@@ -7,6 +7,8 @@ import cv2
 # import time
 from threading import Thread
 import queue
+import compare_face
+import util
 
 
 class mqtt_task:
@@ -120,11 +122,38 @@ class face_analyze_task:
         else:
             print(input_image_path + ":NOT Human!")
 
+    def face_exist(self, input_image_path: str):
+        (input_image_basepath, ext) = os.path.splitext(input_image_path)
+
+        input_image = cv2.imread(input_image_path, cv2.IMREAD_UNCHANGED)
+        face_cascade_name = cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
+        face_cascade = cv2.CascadeClassifier(face_cascade_name)
+
+        # 顔を検出
+        faces = face_cascade.detectMultiScale(input_image)
+
+        return (len(faces) != 0)
+
     def run(self):
         try:
+            face_analysis = compare_face.create_face_analysis()
+
             while True:
                 latest_filename = self.queue.get()
-                self.face_location(latest_filename)
+                # self.face_location(latest_filename)
+
+                if self.face_exist(latest_filename):
+                    regface_dir = "./register"
+                    regfaces = util.list_files(regface_dir)
+                    for f in regfaces:
+                        path = os.path.join(regface_dir, f)
+                        sim = compare_face.get_sim_with_fa(face_analysis, path, latest_filename)
+                        if sim > 0.35:
+                            print("(" + path + ")Registerd person detected[" + str(sim) + "]")
+                        else:
+                            print("(" + path + ")NOT registerd person detected[" + str(sim) + "]")
+                else:
+                    print("No person detected")
         except KeyboardInterrupt:
             pass
 
