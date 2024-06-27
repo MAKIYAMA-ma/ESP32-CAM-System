@@ -17,11 +17,12 @@ def create_message_body(title: str, body: str):
 
 def send_mail(msg: EmailMessage):
     # context = ssl.create_default_context()
-    # server = smtplib.SMTP_SSL(email_setting.smtp_host, email_setting.smtp_port, context=context)
-    server = smtplib.SMTP(email_setting.smtp_host, email_setting.smtp_port)
-    server.login(email_setting.username, email_setting.password)
-    server.send_message(msg)
-    server.quit()
+    # with smtplib.SMTP_SSL(email_setting.smtp_host, email_setting.smtp_port, context=context) as server:
+    with smtplib.SMTP(email_setting.smtp_host, email_setting.smtp_port) as server:
+        server.ehlo()
+        print("Support:", server.esmtp_features)
+        server.login(email_setting.username, email_setting.password)
+        server.send_message(msg)
 
 
 def main(title: str, body: str):
