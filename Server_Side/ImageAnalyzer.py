@@ -9,6 +9,7 @@ from threading import Thread
 import queue
 import compare_face
 import util
+import notification
 
 
 class mqtt_task:
@@ -150,7 +151,9 @@ class face_analyze_task:
                         if sim > 0.35:
                             print("(" + path + ")Registerd person detected[" + str(sim) + "]")
                         else:
-                            print("(" + path + ")NOT registerd person detected[" + str(sim) + "]")
+                            msg = "(" + path + ")NOT registerd person detected[" + str(sim) + "]"
+                            print(msg)
+                            notification.main("UNKNWON person was detected!!", msg)
                 else:
                     print("No person detected")
         except KeyboardInterrupt:
