@@ -16,9 +16,9 @@ def create_message_body(title: str, body: str):
 
 
 def send_mail(msg: EmailMessage):
-    # context = ssl.create_default_context()
-    # with smtplib.SMTP_SSL(email_setting.smtp_host, email_setting.smtp_port, context=context) as server:
-    with smtplib.SMTP(email_setting.smtp_host, email_setting.smtp_port) as server:
+    context = ssl.create_default_context()
+    # with smtplib.SMTP(email_setting.smtp_host, email_setting.smtp_port) as server:
+    with smtplib.SMTP_SSL(email_setting.smtp_host, email_setting.smtp_port, context=context) as server:
         server.ehlo()
         print("Support:", server.esmtp_features)
         server.login(email_setting.username, email_setting.password)
