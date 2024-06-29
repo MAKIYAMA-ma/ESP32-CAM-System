@@ -153,7 +153,7 @@ class face_analyze_task:
                     else:
                         msg = "NOT registerd person detected[" + str(sims) + "]"
                         print(msg)
-                        notification.main("UNKNWON person was detected!!", msg)
+                        notification.main("UNKNWON person was detected!!", msg, latest_filename)
                 else:
                     print("No person detected")
         except KeyboardInterrupt:
