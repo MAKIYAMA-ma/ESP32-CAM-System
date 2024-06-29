@@ -7,8 +7,9 @@ import cv2
 # import time
 from threading import Thread
 import queue
-import compare_face
-import util
+# import compare_face
+from compare_face import Comparator
+# import util
 import notification
 
 
@@ -136,24 +137,23 @@ class face_analyze_task:
 
     def run(self):
         try:
-            face_analysis = compare_face.create_face_analysis()
+            comparotor = Comparator()
+            comparotor.save_regfaces()
 
             while True:
                 latest_filename = self.queue.get()
                 # self.face_location(latest_filename)
 
                 if self.face_exist(latest_filename):
-                    regface_dir = "./register"
-                    regfaces = util.list_files(regface_dir)
-                    for f in regfaces:
-                        path = os.path.join(regface_dir, f)
-                        sim = compare_face.get_sim_with_fa(face_analysis, path, latest_filename)
-                        if sim > 0.35:
-                            print("(" + path + ")Registerd person detected[" + str(sim) + "]")
-                        else:
-                            msg = "(" + path + ")NOT registerd person detected[" + str(sim) + "]"
-                            print(msg)
-                            notification.main("UNKNWON person was detected!!", msg)
+                    sims = comparotor.get_reg_sim(latest_filename)
+                    max_sim = max([item for sublist in sims for item in sublist])
+                    # 登録されている人が混じっているならOKとする
+                    if max_sim > 0.35:
+                        print("Registerd person detected[" + str(sims) + "]")
+                    else:
+                        msg = "NOT registerd person detected[" + str(sims) + "]"
+                        print(msg)
+                        notification.main("UNKNWON person was detected!!", msg)
                 else:
                     print("No person detected")
         except KeyboardInterrupt:
