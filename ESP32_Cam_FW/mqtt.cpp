@@ -12,6 +12,7 @@ const char *topic = "esp32-cam/img";
 const char *mqtt_username = "testuser";
 const char *mqtt_password = "testpass";
 const int mqtt_port = 1883;
+const int payload_max_size = 10240;
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -30,7 +31,7 @@ void mqtt_init()
     // MQTTブローカーへの接続
     client.setServer(mqtt_broker, mqtt_port);
     client.setCallback(callback);
-    client.setBufferSize(8192);
+    client.setBufferSize(payload_max_size);
     while (!client.connected()) {
         String client_id = "esp32-client-";
         client_id += String(WiFi.macAddress());
