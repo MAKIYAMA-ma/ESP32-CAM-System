@@ -7,9 +7,10 @@
 **********************************************************************/
 #include "esp_camera.h"
 #include "esp_timer.h"
-#include "sd_read_write.h"
-#include "SD_MMC.h"
+//#include "sd_read_write.h"
+//#include "SD_MMC.h"
 #include "mqtt.h"
+#include "bluetooth.h"
 #include <WiFi.h>
 #include <stdlib.h>
 
@@ -93,12 +94,14 @@ void setup() {
 
     // MQTT
     mqtt_init();
+    bt_init();
 }
 
 void loop() {
     static int64_t latest_time = esp_timer_get_time();
     int64_t i;
     static int64_t snap_cnt = 0;
+    String rcvd_cmd;
 
     for(i = 0; i < 1000000; i++);   // aren't there wait function?
     int64_t current_time = esp_timer_get_time();
@@ -125,6 +128,13 @@ void loop() {
     }
 
     mqtt_task();
+
+    rcvd_cmd = bt_receive();
+    if(rcvd_cmd != "") {
+        Serial.println(rcvd_cmd);
+    }
+
+    delay(50);
 }
 
 void config_init() {
