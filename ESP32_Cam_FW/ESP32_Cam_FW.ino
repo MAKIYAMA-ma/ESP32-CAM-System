@@ -102,9 +102,14 @@ void loop() {
     int64_t i;
     static int64_t snap_cnt = 0;
     String rcvd_cmd;
+    int64_t current_time;
 
-    for(i = 0; i < 1000000; i++);   // aren't there wait function?
-    int64_t current_time = esp_timer_get_time();
+    rcvd_cmd = bt_read_string();
+    if(rcvd_cmd != "") {
+        Serial.print(rcvd_cmd);
+    }
+
+    current_time = esp_timer_get_time();
     if(((current_time - latest_time) / 1000) > (CAPTURE_INTERVAL)) {
     //if(((current_time - latest_time) / 1000) > (10*1000)) {
         uint8_t *buf = NULL;
@@ -128,11 +133,6 @@ void loop() {
     }
 
     mqtt_task();
-
-    rcvd_cmd = bt_receive();
-    if(rcvd_cmd != "") {
-        Serial.println(rcvd_cmd);
-    }
 
     delay(50);
 }
