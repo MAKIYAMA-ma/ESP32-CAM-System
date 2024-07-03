@@ -106,6 +106,10 @@ void loop() {
     int64_t interval = CAPTURE_INTERVAL;
     bool capture = false;
 
+    // try reconnect if disconnected
+    mqtt_retry_connect();
+
+    // get received command via bluetooth
     rcvd_cmd = bt_read_string();
     if(rcvd_cmd != "") {
         Serial.print(rcvd_cmd);
