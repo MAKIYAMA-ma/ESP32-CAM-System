@@ -103,15 +103,24 @@ void loop() {
     static int64_t snap_cnt = 0;
     String rcvd_cmd;
     int64_t current_time;
+    int64_t interval = CAPTURE_INTERVAL;
+    bool capture = false;
 
     rcvd_cmd = bt_read_string();
     if(rcvd_cmd != "") {
         Serial.print(rcvd_cmd);
+
+        if(rcvd_cmd == "shot") {
+            capture = true;
+        }
     }
 
-    current_time = esp_timer_get_time();
-    if(((current_time - latest_time) / 1000) > (CAPTURE_INTERVAL)) {
-    //if(((current_time - latest_time) / 1000) > (10*1000)) {
+    //current_time = esp_timer_get_time();
+    //if(((current_time - latest_time) / 1000) > interval) {
+    //    capture = true;
+    //}
+
+    if(capture) {
         uint8_t *buf = NULL;
         size_t data_size = 0;
 
