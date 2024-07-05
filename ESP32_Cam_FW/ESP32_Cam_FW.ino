@@ -16,6 +16,7 @@
 #include <string>
 
 #undef SAVE_IMAGE_TO_SDCARD
+#undef USE_BLT_CMD
 
 #define CAPTURE_INTERVAL 10*1000  // once per 10 sec
 
@@ -95,7 +96,9 @@ void setup() {
 
     // MQTT
     mqtt_init();
+#ifdef USE_BLT_CMD
     bt_init();
+#endif
 }
 
 void loop() {
@@ -110,6 +113,7 @@ void loop() {
     // try reconnect if disconnected
     mqtt_retry_connect();
 
+#ifdef USE_BLT_CMD
     // get received command via bluetooth
     bt_chk_command();
     rcvd_cmd = bt_get_command();
@@ -120,11 +124,12 @@ void loop() {
             capture = true;
         }
     }
+#endif
 
-    //current_time = esp_timer_get_time();
-    //if(((current_time - latest_time) / 1000) > interval) {
-    //    capture = true;
-    //}
+    current_time = esp_timer_get_time();
+    if(((current_time - latest_time) / 1000) > interval) {
+        capture = true;
+    }
 
     if(capture) {
         uint8_t *buf = NULL;
