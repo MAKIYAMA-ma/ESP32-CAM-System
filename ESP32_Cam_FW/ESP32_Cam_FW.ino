@@ -110,9 +110,6 @@ void loop() {
     int64_t interval = CAPTURE_INTERVAL;
     bool capture = false;
 
-    // try reconnect if disconnected
-    mqtt_retry_connect();
-
 #ifdef USE_BLT_CMD
     // get received command via bluetooth
     bt_chk_command();
