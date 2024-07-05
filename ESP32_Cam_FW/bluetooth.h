@@ -1,7 +1,10 @@
 #ifndef __BLUETOOTH_H
 #define __BLUETOOTH_H
 
+#include <string>
+
 void bt_init();
-String bt_read_string();
+void bt_chk_command();
+std::string bt_get_command();
 
 #endif  // __BLUETOOTH_H

@@ -13,6 +13,7 @@
 #include "bluetooth.h"
 #include <WiFi.h>
 #include <stdlib.h>
+#include <string>
 
 #undef SAVE_IMAGE_TO_SDCARD
 
@@ -101,7 +102,7 @@ void loop() {
     static int64_t latest_time = esp_timer_get_time();
     int64_t i;
     static int64_t snap_cnt = 0;
-    String rcvd_cmd;
+    std::string rcvd_cmd;
     int64_t current_time;
     int64_t interval = CAPTURE_INTERVAL;
     bool capture = false;
@@ -110,9 +111,10 @@ void loop() {
     mqtt_retry_connect();
 
     // get received command via bluetooth
-    rcvd_cmd = bt_read_string();
+    bt_chk_command();
+    rcvd_cmd = bt_get_command();
     if(rcvd_cmd != "") {
-        Serial.print(rcvd_cmd);
+        Serial.print("cmd:[" + String(rcvd_cmd.c_str()) + "]\n");
 
         if(rcvd_cmd == "shot") {
             capture = true;
