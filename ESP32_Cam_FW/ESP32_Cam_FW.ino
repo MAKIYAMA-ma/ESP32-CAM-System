@@ -10,13 +10,15 @@
 //#include "sd_read_write.h"
 //#include "SD_MMC.h"
 #include "mqtt.h"
-#include "bluetooth.h"
 #include <WiFi.h>
 #include <stdlib.h>
 #include <string>
 
 #undef SAVE_IMAGE_TO_SDCARD
 #undef USE_BLT_CMD
+#ifdef USE_BLT_CMD
+    #include "bluetooth.h"
+#endif
 
 #define CAPTURE_INTERVAL 10*1000  // once per 10 sec
 
@@ -123,10 +125,19 @@ void loop() {
     }
 #endif
 
-    current_time = esp_timer_get_time();
-    if(((current_time - latest_time) / 1000) > interval) {
-        capture = true;
+    rcvd_cmd = mqtt_get_command();
+    if(rcvd_cmd != "") {
+        Serial.print("cmd:[" + String(rcvd_cmd.c_str()) + "]\n");
+
+        if(rcvd_cmd == "shot") {
+            capture = true;
+        }
     }
+
+    // current_time = esp_timer_get_time();
+    // if(((current_time - latest_time) / 1000) > interval) {
+    //     capture = true;
+    // }
 
     if(capture) {
         uint8_t *buf = NULL;

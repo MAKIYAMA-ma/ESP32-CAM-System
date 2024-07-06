@@ -1,6 +1,8 @@
 #include <WiFi.h>
 #include <PubSubClient.h>
 #include "wifi_setting.h"
+#include "command_receiver.h"
+#include <string.h>
 
 // #define MQTT_MAX_PACKET_SIZE 8192
 
@@ -8,11 +10,14 @@ static void callback(char *topic, byte *payload, unsigned int length);
 
 // MQTTブローカー
 const char *mqtt_broker = "192.168.0.8";
-const char *topic = "esp32-cam/img";
+const char *pub_topic = "esp32-cam/img";
+const char *sub_topic = "esp32-cam/control";
 const char *mqtt_username = "testuser";
 const char *mqtt_password = "testpass";
 const int mqtt_port = 1883;
 const int payload_max_size = 10240;
+
+CommandFIFO fifo(8);
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -63,7 +68,7 @@ void mqtt_init()
 
     // test
     // client.publish(topic, "Hello world from ESP32");
-    // client.subscribe(topic);
+    client.subscribe(sub_topic);
 }
 
 static void callback(char *topic, byte *payload, unsigned int length)
@@ -74,15 +79,22 @@ static void callback(char *topic, byte *payload, unsigned int length)
     for (int i = 0; i < length; i++) {
         Serial.print((char)payload[i]);
     }
+    std::string result((char *)payload, (int)length);
+    fifo.enqueue(result);
     Serial.println();
     Serial.println("-----------------------");
+}
+
+std::string mqtt_get_command()
+{
+    return fifo.dequeue();
 }
 
 void pub_image(const byte *image_data, unsigned int length)
 {
     Serial.print("len:");
     Serial.println(length);
-    boolean result = client.publish(topic, image_data, length);
+    boolean result = client.publish(pub_topic, image_data, length);
     if(result) {
         Serial.println("pub success");
     } else {
@@ -101,6 +113,8 @@ void mqtt_task(void)
         //if (client.connect(client_id.c_str(), mqtt_username, mqtt_password)) {
         if (client.connect(client_id.c_str())) {
             Serial.println("Succes to connect MQTT Broker");
+            client.subscribe(sub_topic);
+            client.loop();
         } else {
             Serial.print("Fail to connect MQTT Broker:");
             Serial.println(client.state());
