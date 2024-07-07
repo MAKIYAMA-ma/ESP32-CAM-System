@@ -19,6 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Cam_Controller"
+rootProject.name = "ESP32_Cam_Controller"
 include(":app")
- 

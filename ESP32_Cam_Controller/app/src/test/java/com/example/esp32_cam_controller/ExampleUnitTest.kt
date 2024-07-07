@@ -1,4 +1,4 @@
-package com.example.cam_controller
+package com.example.esp32_cam_controller
 
 import org.junit.Test
 
