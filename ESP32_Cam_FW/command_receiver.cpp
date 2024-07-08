@@ -4,8 +4,8 @@
 CommandFIFO::CommandFIFO(size_t maxSize) : maxSize(maxSize) {}
 
 void CommandFIFO::enqueue(const std::string& str) {
-    if (str.length() > 16) {
-        std::cerr << "Error: std::string length exceeds 16 characters" << std::endl;
+    if (str.length() > 256) {
+        std::cerr << "Error: std::string length exceeds 256 characters" << std::endl;
         return;
     }
     if (fifo.size() == maxSize) {
