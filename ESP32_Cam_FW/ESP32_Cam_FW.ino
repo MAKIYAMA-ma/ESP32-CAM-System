@@ -13,6 +13,7 @@
 #include <WiFi.h>
 #include <stdlib.h>
 #include <string>
+#include <ArduinoJson.h>
 
 #undef SAVE_IMAGE_TO_SDCARD
 #undef USE_BLT_CMD
@@ -109,7 +110,8 @@ void loop() {
     static int64_t snap_cnt = 0;
     std::string rcvd_cmd;
     int64_t current_time;
-    int64_t interval = CAPTURE_INTERVAL;
+    static int64_t interval = CAPTURE_INTERVAL;
+    static bool interval_shot = false;
     bool capture = false;
 
 #ifdef USE_BLT_CMD
@@ -127,17 +129,39 @@ void loop() {
 
     rcvd_cmd = mqtt_get_command();
     if(rcvd_cmd != "") {
-        Serial.print("cmd:[" + String(rcvd_cmd.c_str()) + "]\n");
+        StaticJsonDocument<10> doc;
+        DeserializationError error = deserializeJson(doc, rcvd_cmd);
 
-        if(rcvd_cmd == "shot") {
-            capture = true;
+        // エラーのチェック
+        if (error) {
+            Serial.print(F("deserializeJson() failed: "));
+            Serial.println(error.f_str());
+            return;
+        }
+
+        if(doc.containsKey("shot")) {
+            capture = doc["shot"];
+        }
+        if(doc.containsKey("interval_shot")) {
+            if(doc["interval_shot"]) {
+                Serial.println("enable interval shot");
+            } else {
+                Serial.println("disable interval shot");
+            }
+            interval_shot = doc["interval_shot"];
+        }
+        if(doc.containsKey("interval")) {
+            interval = doc["interval"];
         }
     }
 
-    // current_time = esp_timer_get_time();
-    // if(((current_time - latest_time) / 1000) > interval) {
-    //     capture = true;
-    // }
+    if(interval_shot) {
+        current_time = esp_timer_get_time();
+        if(((current_time - latest_time) / 1000) > interval) {
+            Serial.printf("Current time[%d]\n", current_time);
+            capture = true;
+        }
+    }
 
     if(capture) {
         uint8_t *buf = NULL;
