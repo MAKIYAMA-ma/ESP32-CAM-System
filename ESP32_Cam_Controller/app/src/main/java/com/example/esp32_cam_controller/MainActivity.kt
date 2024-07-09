@@ -45,6 +45,8 @@ class MainActivity : AppCompatActivity() {
                 println("Delivery complete")
             }
         })
+
+        connectAndPublish()
     }
 
     private fun connectAndPublish() {
