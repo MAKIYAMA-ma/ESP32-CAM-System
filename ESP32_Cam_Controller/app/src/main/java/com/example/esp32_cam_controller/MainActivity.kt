@@ -28,7 +28,7 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        val brokerUrl = "192.168.0.8:1883"
+        val brokerUrl = "tcp://192.168.0.8:1883"
         val clientId = "KotlinAndroidClient"
         mqttClient = MqttAndroidClient(this, brokerUrl, clientId)
 
@@ -50,6 +50,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun connectAndPublish() {
+        println("connectAndPublish");
+
         try {
             val options = MqttConnectOptions()
             options.isCleanSession = true
