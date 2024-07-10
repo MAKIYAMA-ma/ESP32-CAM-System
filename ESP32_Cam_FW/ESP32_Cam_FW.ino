@@ -144,6 +144,7 @@ void loop() {
         }
         if(doc.containsKey("interval_shot")) {
             if(doc["interval_shot"]) {
+                latest_time = esp_timer_get_time();
                 Serial.println("enable interval shot");
             } else {
                 Serial.println("disable interval shot");
