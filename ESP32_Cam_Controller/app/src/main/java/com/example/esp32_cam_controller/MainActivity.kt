@@ -14,9 +14,11 @@ import org.eclipse.paho.client.mqttv3.MqttMessage
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions
 import org.eclipse.paho.client.mqttv3.MqttException
 import org.eclipse.paho.client.mqttv3.MqttClient
+import android.content.IntentFilter
 
 class MainActivity : AppCompatActivity() {
     private lateinit var mqttClient: MqttAndroidClient
+    private lateinit var receiver: MyReceiver
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,7 +34,7 @@ class MainActivity : AppCompatActivity() {
         val clientId = "KotlinAndroidClient"
         mqttClient = MqttAndroidClient(this, brokerUrl, clientId)
 
-        mqttClient.setCallback(object : MqttCallback {
+        val existingCallback = object : MqttCallback {
             override fun connectionLost(cause: Throwable?) {
                 println("Connection lost: ${cause?.message}")
             }
@@ -44,17 +46,31 @@ class MainActivity : AppCompatActivity() {
             override fun deliveryComplete(token: IMqttDeliveryToken?) {
                 println("Delivery complete")
             }
-        })
+        }
+
+        val customCallback = CustomMqttCallback(this, existingCallback)
+        mqttClient.setCallback(customCallback)
+
+        receiver = MyReceiver()
+        val filter = IntentFilter("android.net.conn.CONNECTIVITY_CHANGE")
+        registerReceiver(receiver, filter)
 
         connectAndPublish()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        unregisterReceiver(receiver)
     }
 
     private fun connectAndPublish() {
         println("connectAndPublish");
 
         try {
-            val options = MqttConnectOptions()
-            options.isCleanSession = true
+            val options = MqttConnectOptions().apply {
+                isAutomaticReconnect = true
+                isCleanSession = true
+            }
 
             mqttClient.connect(options, null, object : IMqttActionListener {
                 override fun onSuccess(asyncActionToken: IMqttToken?) {
