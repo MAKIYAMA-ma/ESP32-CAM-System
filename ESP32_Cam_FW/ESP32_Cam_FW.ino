@@ -141,12 +141,12 @@ void loop() {
                 capture = doc["shot"];
             }
             if(doc.containsKey("interval_shot")) {
-                if(doc["interval_shot"]) {
+                interval_shot = doc["interval_shot"];
+                if(interval_shot) {
                     Serial.println("enable interval shot");
                 } else {
                     Serial.println("disable interval shot");
                 }
-                interval_shot = doc["interval_shot"];
             }
             if(doc.containsKey("interval")) {
                 interval = doc["interval"];
