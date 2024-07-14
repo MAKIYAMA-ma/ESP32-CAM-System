@@ -136,22 +136,21 @@ void loop() {
         if (error) {
             Serial.print(F("deserializeJson() failed: "));
             Serial.println(error.f_str());
-            return;
-        }
-
-        if(doc.containsKey("shot")) {
-            capture = doc["shot"];
-        }
-        if(doc.containsKey("interval_shot")) {
-            if(doc["interval_shot"]) {
-                Serial.println("enable interval shot");
-            } else {
-                Serial.println("disable interval shot");
+        } else {
+            if(doc.containsKey("shot")) {
+                capture = doc["shot"];
             }
-            interval_shot = doc["interval_shot"];
-        }
-        if(doc.containsKey("interval")) {
-            interval = doc["interval"];
+            if(doc.containsKey("interval_shot")) {
+                interval_shot = doc["interval_shot"];
+                if(interval_shot) {
+                    Serial.println("enable interval shot");
+                } else {
+                    Serial.println("disable interval shot");
+                }
+            }
+            if(doc.containsKey("interval")) {
+                interval = doc["interval"];
+            }
         }
     }
 
