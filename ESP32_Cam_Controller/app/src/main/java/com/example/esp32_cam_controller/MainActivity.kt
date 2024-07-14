@@ -5,7 +5,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import org.eclipse.paho.android.service.MqttAndroidClient
+import info.mqtt.android.service.MqttAndroidClient
 import org.eclipse.paho.client.mqttv3.IMqttActionListener
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken
 import org.eclipse.paho.client.mqttv3.IMqttToken
@@ -48,12 +48,12 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        val customCallback = CustomMqttCallback(this, existingCallback)
-        mqttClient.setCallback(customCallback)
+        // val customCallback = CustomMqttCallback(this, existingCallback)
+        // mqttClient.setCallback(customCallback)
 
-        receiver = MyReceiver()
-        val filter = IntentFilter("android.net.conn.CONNECTIVITY_CHANGE")
-        registerReceiver(receiver, filter)
+        // receiver = MyReceiver()
+        // val filter = IntentFilter("android.net.conn.CONNECTIVITY_CHANGE")
+        // registerReceiver(receiver, filter)
 
         connectAndPublish()
     }
