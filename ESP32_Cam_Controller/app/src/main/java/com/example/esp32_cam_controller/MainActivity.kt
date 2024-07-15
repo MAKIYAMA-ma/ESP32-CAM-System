@@ -5,6 +5,8 @@ import android.content.Context
 import android.util.Log
 import android.view.View
 import android.widget.Button
+import android.widget.ImageView
+import android.graphics.BitmapFactory
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -22,6 +24,8 @@ import android.content.IntentFilter
 
 class MainActivity : AppCompatActivity() {
     private lateinit var mqttClient: MqttAndroidClient
+    private var topicEsp32CamControl = "esp32-cam/control"
+    private var topicEsp32CamImage = "esp32-cam/img"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,6 +47,14 @@ class MainActivity : AppCompatActivity() {
 
             override fun messageArrived(topic: String?, message: MqttMessage?) {
                 println("Message arrived: ${message?.toString()}")
+                if (topic == topicEsp32CamImage) {
+                    // image data is received
+                    message?.payload?.let {
+                        runOnUiThread {
+                            displayImage(it)
+                        }
+                    }
+                }
             }
 
             override fun deliveryComplete(token: IMqttDeliveryToken?) {
@@ -50,8 +62,10 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
-        // connectAndPublish()
+        // Connect to MQTT broker
         connect(this)
+
+        // set function of button
         val btShot = findViewById<Button>(R.id.shotButton)
         val listener = ShotButtonListerner()
         btShot.setOnClickListener(listener)
@@ -74,6 +88,9 @@ class MainActivity : AppCompatActivity() {
             mqttClient.connect(options, null, object : IMqttActionListener {
                 override fun onSuccess(asyncActionToken: IMqttToken?) {
                     Log.d(TAG, "Connection success")
+
+                    // start subscribe image data
+                    subscribe(topicEsp32CamImage)
                 }
 
                 override fun onFailure(asyncActionToken: IMqttToken?, exception: Throwable?) {
@@ -153,47 +170,16 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // private fun connectAndPublish() {
-    //     println("connectAndPublish");
-
-    //     try {
-    //         val options = MqttConnectOptions().apply {
-    //             isAutomaticReconnect = true
-    //             isCleanSession = true
-    //         }
-
-    //         mqttClient.connect(options, null, object : IMqttActionListener {
-    //             override fun onSuccess(asyncActionToken: IMqttToken?) {
-    //                 println("Connected to broker")
-
-    //                 val topic = "test/topic"
-    //                 val message = MqttMessage("Hello from Android Kotlin".toByteArray())
-    //                 message.qos = 2
-
-    //                 mqttClient.publish(topic, message, null, object : IMqttActionListener {
-    //                     override fun onSuccess(asyncActionToken: IMqttToken?) {
-    //                         println("Message published")
-    //                     }
-
-    //                     override fun onFailure(asyncActionToken: IMqttToken?, exception: Throwable?) {
-    //                         println("Failed to publish message: ${exception?.message}")
-    //                     }
-    //                 })
-    //             }
-
-    //             override fun onFailure(asyncActionToken: IMqttToken?, exception: Throwable?) {
-    //                 println("Failed to connect to broker: ${exception?.message}")
-    //             }
-    //         })
-    //     } catch (e: MqttException) {
-    //         e.printStackTrace()
-    //     }
-    // }
+    private fun displayImage(imageData: ByteArray) {
+        val bitmap = BitmapFactory.decodeByteArray(imageData, 0, imageData.size)
+        val imageView: ImageView = findViewById(R.id.captureImage)
+        imageView.setImageBitmap(bitmap)
+    }
 
     // Listener
     private inner class ShotButtonListerner : View.OnClickListener {
         override fun onClick(view: View) {
-            publish("esp32-cam/control", "{ \"shot\" : true }")
+            publish(topicEsp32CamControl, "{ \"shot\" : true }")
         }
     }
 }
