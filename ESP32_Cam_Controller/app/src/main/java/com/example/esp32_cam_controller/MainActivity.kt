@@ -5,6 +5,8 @@ import android.content.Context
 import android.util.Log
 import android.view.View
 import android.widget.Button
+import android.widget.EditText
+import android.widget.CheckBox
 import android.widget.ImageView
 import android.graphics.BitmapFactory
 import androidx.activity.enableEdgeToEdge
@@ -67,8 +69,12 @@ class MainActivity : AppCompatActivity() {
 
         // set function of button
         val btShot = findViewById<Button>(R.id.shotButton)
-        val listener = ShotButtonListerner()
-        btShot.setOnClickListener(listener)
+        val btShotListener = ShotButtonListerner()
+        btShot.setOnClickListener(btShotListener)
+
+        val btSet = findViewById<Button>(R.id.settingButton)
+        val btSetListener = SettingButtonListerner()
+        btSet.setOnClickListener(btSetListener)
     }
 
     override fun onDestroy() {
@@ -180,6 +186,20 @@ class MainActivity : AppCompatActivity() {
     private inner class ShotButtonListerner : View.OnClickListener {
         override fun onClick(view: View) {
             publish(topicEsp32CamControl, "{ \"shot\" : true }")
+        }
+    }
+
+    private inner class SettingButtonListerner : View.OnClickListener {
+        override fun onClick(view: View) {
+            val cbIntervalEn = findViewById<CheckBox>(R.id.checkBox_intervalShot)
+            val txtIntervalTime = findViewById<EditText>(R.id.editTextNumber)
+
+            val enIntervalShot = if (cbIntervalEn.isChecked()) "true" else "false"
+            val intervalTime = txtIntervalTime.getText()
+
+            val payload = "{ \"interval_shot\" : " + enIntervalShot + ", \"interval\" : " + intervalTime + "}";
+
+            publish(topicEsp32CamControl, payload)
         }
     }
 }

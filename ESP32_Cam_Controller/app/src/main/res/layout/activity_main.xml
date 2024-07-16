@@ -7,16 +7,6 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
     <Button
         android:id="@+id/shotButton"
         android:layout_width="201dp"
@@ -39,5 +29,59 @@
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintVertical_bias="0.2"
         tools:srcCompat="@tools:sample/backgrounds/scenic" />
+
+    <CheckBox
+        android:id="@+id/checkBox_intervalShot"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Enable Interval Shot"
+        tools:layout_editor_absoluteX="50dp"
+        tools:layout_editor_absoluteY="430dp" />
+
+    <TextView
+        android:id="@+id/textView_interval"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Interval:"
+        android:textSize="18sp"
+        tools:layout_editor_absoluteX="60dp"
+        tools:layout_editor_absoluteY="500dp" />
+
+    <EditText
+        android:id="@+id/editTextNumber"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="interval time[msec]"
+        android:inputType="number"
+        tools:layout_editor_absoluteX="127dp"
+        tools:layout_editor_absoluteY="487dp" />
+
+    <!-- <RadioGroup -->
+    <!--     android:layout_width="wrap_content" -->
+    <!--     android:layout_height="wrap_content" -->
+    <!--     tools:layout_editor_absoluteX="50dp" -->
+    <!--     tools:layout_editor_absoluteY="550dp"> -->
+
+    <!--     <RadioButton -->
+    <!--         android:id="@+id/radioButton_fromBoard" -->
+    <!--         android:layout_width="match_parent" -->
+    <!--         android:layout_height="wrap_content" -->
+    <!--         android:text="subscribe from Board" /> -->
+
+    <!--     <RadioButton -->
+    <!--         android:id="@+id/radioButton_fromServer" -->
+    <!--         android:layout_width="match_parent" -->
+    <!--         android:layout_height="wrap_content" -->
+    <!--         android:text="subscribe from Server" /> -->
+    <!-- </RadioGroup> -->
+
+    <Button
+        android:id="@+id/settingButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="SET"
+        tools:layout_editor_absoluteX="161dp"
+        tools:layout_editor_absoluteY="550dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
