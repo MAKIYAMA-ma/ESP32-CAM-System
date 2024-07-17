@@ -144,6 +144,7 @@ void loop() {
                 interval_shot = doc["interval_shot"];
                 if(interval_shot) {
                     Serial.println("enable interval shot");
+                    latest_time = esp_timer_get_time();
                 } else {
                     Serial.println("disable interval shot");
                 }
