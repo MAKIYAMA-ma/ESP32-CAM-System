@@ -77,17 +77,31 @@
 
     <EditText
         android:id="@+id/editTextNumber"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="157dp"
+        android:layout_height="42dp"
         android:ems="10"
-        android:hint="interval time[msec]"
+        android:hint="(n >= 5000)[msec]"
         android:inputType="number"
+        android:text="10000"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.547"
+        app:layout_constraintHorizontal_bias="0.392"
         app:layout_constraintStart_toStartOf="@+id/textView_interval"
         app:layout_constraintTop_toTopOf="@+id/checkBox_intervalShot"
         app:layout_constraintVertical_bias="0.282" />
+
+    <TextView
+        android:id="@+id/textView_intervalunit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="[msec]"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.709"
+        app:layout_constraintStart_toStartOf="@+id/editTextNumber"
+        app:layout_constraintTop_toTopOf="@+id/checkBox_intervalShot"
+        app:layout_constraintVertical_bias="0.297" />
 
     <Button
         android:id="@+id/settingButton"
