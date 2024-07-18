@@ -195,11 +195,15 @@ class MainActivity : AppCompatActivity() {
             val txtIntervalTime = findViewById<EditText>(R.id.editTextNumber)
 
             val enIntervalShot = if (cbIntervalEn.isChecked()) "true" else "false"
-            val intervalTime = txtIntervalTime.getText()
+            val intervalTime = txtIntervalTime.getText().toString()
+            val intervalTime_num = intervalTime.toIntOrNull()
 
-            val payload = "{ \"interval_shot\" : " + enIntervalShot + ", \"interval\" : " + intervalTime + "}";
-
-            publish(topicEsp32CamControl, payload)
+            if((intervalTime_num != null) && (intervalTime_num >= 5000)) {
+                val payload = "{ \"interval_shot\" : " + enIntervalShot + ", \"interval\" : " + intervalTime + "}";
+                publish(topicEsp32CamControl, payload)
+            } else {
+                // TODO 警告
+            }
         }
     }
 }
