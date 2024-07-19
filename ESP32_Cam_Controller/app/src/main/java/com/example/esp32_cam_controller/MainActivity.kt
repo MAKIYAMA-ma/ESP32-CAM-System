@@ -14,14 +14,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import info.mqtt.android.service.MqttAndroidClient
-import org.eclipse.paho.client.mqttv3.IMqttActionListener
-import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken
-import org.eclipse.paho.client.mqttv3.IMqttToken
-import org.eclipse.paho.client.mqttv3.MqttCallback
-import org.eclipse.paho.client.mqttv3.MqttMessage
-import org.eclipse.paho.client.mqttv3.MqttConnectOptions
-import org.eclipse.paho.client.mqttv3.MqttException
-import org.eclipse.paho.client.mqttv3.MqttClient
+import org.eclipse.paho.client.mqttv3.*
 import android.content.IntentFilter
 
 class MainActivity : AppCompatActivity() {
@@ -42,7 +35,16 @@ class MainActivity : AppCompatActivity() {
         val brokerUrl = "tcp://192.168.0.8:1883"
         val clientId = "ESP32-CAM-Controller"
         mqttClient = MqttAndroidClient(this, brokerUrl, clientId)
-        mqttClient.setCallback(object : MqttCallback {
+        mqttClient.setCallback(object : MqttCallbackExtended {
+            override fun connectComplete(reconnect: Boolean, serverURI: String) {
+                if (reconnect) {
+                    println("Reconnected to: $serverURI")
+                    subscribe(topicEsp32CamImage)
+                } else {
+                    println("Connection to: $serverURI")
+                }
+            }
+
             override fun connectionLost(cause: Throwable?) {
                 println("Connection lost: ${cause?.message}")
             }
