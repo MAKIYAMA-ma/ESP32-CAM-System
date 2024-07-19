@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">ESP32_Cam_Controller</string>
     <string name="shot_button">SHOT!</string>
+    <string name="set_button">SET</string>
+    <string name="en_intervalshot_cb">Enable Interval Shot</string>
+    <string name="interval_label">Interval</string>
+    <string name="interval_unit">[msec]</string>
+    <string name="interval_time_init">10000</string>
 </resources>
