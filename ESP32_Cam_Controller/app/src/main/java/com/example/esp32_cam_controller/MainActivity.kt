@@ -9,6 +9,7 @@ import android.widget.EditText
 import android.widget.CheckBox
 import android.widget.ImageView
 import android.graphics.BitmapFactory
+import android.app.AlertDialog
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -75,7 +76,7 @@ class MainActivity : AppCompatActivity() {
         btShot.setOnClickListener(btShotListener)
 
         val btSet = findViewById<Button>(R.id.settingButton)
-        val btSetListener = SettingButtonListerner()
+        val btSetListener = SettingButtonListerner(this)
         btSet.setOnClickListener(btSetListener)
     }
 
@@ -191,7 +192,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private inner class SettingButtonListerner : View.OnClickListener {
+    private inner class SettingButtonListerner(private val context: Context) : View.OnClickListener {
         override fun onClick(view: View) {
             val cbIntervalEn = findViewById<CheckBox>(R.id.checkBox_intervalShot)
             val txtIntervalTime = findViewById<EditText>(R.id.editTextNumber)
@@ -203,8 +204,22 @@ class MainActivity : AppCompatActivity() {
             if((intervalTime_num != null) && (intervalTime_num >= 5000)) {
                 val payload = "{ \"interval_shot\" : " + enIntervalShot + ", \"interval\" : " + intervalTime + "}";
                 publish(topicEsp32CamControl, payload)
+                AlertDialog.Builder(context)
+                    .setTitle("message has been published")
+                    .setMessage("interval shot setting message has been published")
+                    .setPositiveButton("OK") { dialog, _ ->
+                        dialog.dismiss()
+                    }
+                    .show()
             } else {
                 // TODO 警告
+                AlertDialog.Builder(context)
+                    .setTitle("Error")
+                    .setMessage("interval time setting is invalid")
+                    .setPositiveButton("OK") { dialog, _ ->
+                        dialog.dismiss()
+                    }
+                    .show()
             }
         }
     }
