@@ -6,4 +6,6 @@
     <string name="interval_label">Interval</string>
     <string name="interval_unit">[msec]</string>
     <string name="interval_time_init">10000</string>
+    <string name="raw_image">RAW Image</string>
+    <string name="processed_image">Processed Image</string>
 </resources>

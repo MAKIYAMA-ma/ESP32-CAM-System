@@ -8,6 +8,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.CheckBox
 import android.widget.ImageView
+import android.widget.RadioGroup
 import android.graphics.BitmapFactory
 import android.app.AlertDialog
 import androidx.activity.enableEdgeToEdge
@@ -37,6 +38,9 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        val imageTypeRadioGroup = findViewById<RadioGroup>(R.id.imageType_radioGroup)
+        imageTypeRadioGroup.check(R.id.radioButton_rawImage)
 
         val brokerUrl = "tcp://192.168.0.8:1883"
         val clientId = "ESP32-CAM-Controller"
