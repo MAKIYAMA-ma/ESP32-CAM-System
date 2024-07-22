@@ -20,8 +20,13 @@ import android.content.IntentFilter
 
 class MainActivity : AppCompatActivity() {
     private lateinit var mqttClient: MqttAndroidClient
-    private var topicEsp32CamControl = "esp32-cam/control"
-    private var topicEsp32CamImage = "esp32-cam/img"
+    private var topicEsp32CamControl = "esp32-cam/board/control"
+    private var topicEsp32CamSetting = "esp32-cam/board/setting"
+    private var topicEsp32CamImage = "esp32-cam/img/#"
+    private var topicEsp32CamRawImage = "esp32-cam/img/raw"
+    private var topicEsp32CamProcessedImage = "esp32-cam/img/processed"
+
+    private var showProcessedImage = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,7 +45,7 @@ class MainActivity : AppCompatActivity() {
             override fun connectComplete(reconnect: Boolean, serverURI: String) {
                 if (reconnect) {
                     println("Reconnected to: $serverURI")
-                    subscribe(topicEsp32CamImage)
+                    subscribe(topicEsp32CamImage)   // TODO 利用するのは常にどちらか一方。必要な方のみsubscribeするほうが良い。
                 } else {
                     println("Connection to: $serverURI")
                 }
@@ -52,7 +57,8 @@ class MainActivity : AppCompatActivity() {
 
             override fun messageArrived(topic: String?, message: MqttMessage?) {
                 println("Message arrived: ${message?.toString()}")
-                if (topic == topicEsp32CamImage) {
+                if ((showProcessedImage && (topic == topicEsp32CamProcessedImage)) ||
+                    (!showProcessedImage && (topic == topicEsp32CamRawImage))) {
                     // image data is received
                     message?.payload?.let {
                         runOnUiThread {
@@ -203,7 +209,7 @@ class MainActivity : AppCompatActivity() {
 
             if((intervalTime_num != null) && (intervalTime_num >= 5000)) {
                 val payload = "{ \"interval_shot\" : " + enIntervalShot + ", \"interval\" : " + intervalTime + "}";
-                publish(topicEsp32CamControl, payload)
+                publish(topicEsp32CamSetting, payload)
                 AlertDialog.Builder(context)
                     .setTitle("message has been published")
                     .setMessage("interval shot setting message has been published")

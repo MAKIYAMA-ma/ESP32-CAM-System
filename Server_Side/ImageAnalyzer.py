@@ -11,14 +11,44 @@ import queue
 from compare_face import Comparator
 # import util
 import notification
+import json
+
+
+class mode_singleton:
+    _instance = None
+    send_processed_img = False
+    send_img_path = 1       # 0: not send, 1: e-mail, 2: mqtt
+
+    def __new__(cls, *args, **kwargs):
+        if not cls._instance:
+            cls._instance = super(mode_singleton, cls).__new__(cls, *args, **kwargs)
+        return cls._instance
+
+    def set_send_processed_img(self, value):
+        mode_singleton.send_processed_img = value
+
+    def get_send_processed_img(self):
+        return mode_singleton.send_processed_img
+
+    def set_send_img_path(self, value):
+        mode_singleton.send_img_path = value
+
+    def get_send_img_path(self):
+        return mode_singleton.send_img_path
 
 
 class mqtt_task:
     host = '192.168.0.8'  # MQTT Broker
     port = 1883  # MQTT Port
-    topic = 'esp32-cam/img'
+    topic_img = 'esp32-cam/img/raw'
+    topic_sub = 'esp32-cam/#'
+    topic_control = 'esp32-cam/server/control'
+    topic_setting = 'esp32-cam/server/setting'
+    topic_pub = 'esp32-cam/img/processed'
     image_index = 0
     client_id = 'python-mqtt'
+    client = None
+
     queue = None
 
     def __init__(self, queue):
@@ -26,39 +56,65 @@ class mqtt_task:
 
     def on_connect(self, client, userdata, flags, respons_code):
         print('status {0}'.format(respons_code))
-        client.subscribe(self.topic)
+        client.subscribe(self.topic_sub)
 
     # 受信したバイナリデータを output.jpg として保存する関数
     def on_message(self, client, userdata, msg):
-        tz_jst = timezone(timedelta(hours=9))  # UTC とは9時間差
-        cur_time = datetime.now(tz_jst)
-        dirname = './Data/' + cur_time.strftime("%Y%m%d")
-        filename = cur_time.strftime("%Y%m%d_%H%M%S") + '.jpg'
-        filepath = dirname + '/' + filename
+        if msg.topic == self.topic_img:
+            tz_jst = timezone(timedelta(hours=9))  # UTC とは9時間差
+            cur_time = datetime.now(tz_jst)
+            dirname = './Data/' + cur_time.strftime("%Y%m%d")
+            filename = cur_time.strftime("%Y%m%d_%H%M%S") + '.jpg'
+            filepath = dirname + '/' + filename
 
-        os.makedirs(dirname, exist_ok=True)
-        outfile = open(filepath, 'wb')
-        outfile.write(msg.payload)
-        outfile.close
-        print(filename + " is saved")
+            os.makedirs(dirname, exist_ok=True)
+            outfile = open(filepath, 'wb')
+            outfile.write(msg.payload)
+            outfile.close
+            print(filename + " is saved")
 
-        self.queue.put(filepath, timeout=1)
-        self.image_index = self.image_index + 1
+            self.queue.put(filepath, timeout=1)
+            self.image_index = self.image_index + 1
+        elif msg.topic == self.topic_control:
+            # NOP
+            pass
+        elif msg.topic == self.topic_setting:
+            # TODO
+            mode = mode_singleton()
+            received_data = json.loads(msg.payload)
+            send_image_value = received_data["send_image"]
+            image_type_value = received_data["image_type"]
+            if send_image_value == "none":
+                mode.set_send_img_path(0)
+            elif send_image_value == "mail":
+                mode.set_send_img_path(1)
+            elif send_image_value == "mqtt":
+                mode.set_send_img_path(2)
+
+            if image_type_value == "raw":
+                mode.set_send_img(False)
+            elif image_type_value == "processed":
+                mode.set_send_img(True)
+
+    def publish(self, payload):
+        self.client.publish(self.topic_pub, payload=payload, qos=1, retain=False)
 
     def run(self):
         # client = mqtt.Client(protocol=mqtt.MQTTv311)
-        client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1, self.client_id)
-        client.on_connect = self.on_connect
-        client.on_message = self.on_message
-        client.connect(self.host, port=self.port, keepalive=60)
-        client.loop_forever()
+        self.client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1, self.client_id)
+        self.client.on_connect = self.on_connect
+        self.client.on_message = self.on_message
+        self.client.connect(self.host, port=self.port, keepalive=60)
+        self.client.loop_forever()
 
 
 class face_analyze_task:
     queue = None
+    taskm = None
 
-    def __init__(self, queue):
+    def __init__(self, queue, taskm):
         self.queue = queue
+        self.taskm = taskm
 
     def face_location(self, input_image_path: str):
         (input_image_basepath, ext) = os.path.splitext(input_image_path)
@@ -120,8 +176,10 @@ class face_analyze_task:
 
             # 画像を出力
             cv2.imwrite(output_image_path, output_image)
+            return (True, output_image_path)
         else:
             print(input_image_path + ":NOT Human!")
+            return (False, "")
 
     def face_exist(self, input_image_path: str):
         (input_image_basepath, ext) = os.path.splitext(input_image_path)
@@ -139,12 +197,17 @@ class face_analyze_task:
         try:
             comparotor = Comparator()
             comparotor.save_regfaces()
+            mode = mode_singleton()
 
             while True:
                 latest_filename = self.queue.get()
-                # self.face_location(latest_filename)
 
-                if self.face_exist(latest_filename):
+                if mode.get_send_processed_img():
+                    (face_exist, processed_filename) = self.face_location(latest_filename)
+                else:
+                    face_exist = self.face_exist(latest_filename)
+
+                if face_exist:
                     sims = comparotor.get_reg_sim(latest_filename)
                     max_sim = max([item for sublist in sims for item in sublist])
                     # 登録されている人が混じっているならOKとする
@@ -153,7 +216,23 @@ class face_analyze_task:
                     else:
                         msg = "NOT registerd person detected[" + str(sims) + "]"
                         print(msg)
-                        notification.main("UNKNWON person was detected!!", msg, latest_filename)
+                        if mode.get_send_img_path() == 1:
+                            if mode.get_send_processed_img():
+                                notification.main("UNKNWON person was detected!!", msg, processed_filename)
+                            else:
+                                notification.main("UNKNWON person was detected!!", msg, latest_filename)
+                        elif mode.get_send_img_path() == 2:
+                            # send via MQTT
+                            image_data = None
+                            if mode.get_send_processed_img():
+                                with open(processed_filename, "rb") as image_file:
+                                    image_data = image_file.read()
+                            else:
+                                with open(latest_filename, "rb") as image_file:
+                                    image_data = image_file.read()
+
+                            if image_data is not None:
+                                self.taskm.publish(image_data)
                 else:
                     print("No person detected")
         except KeyboardInterrupt:
@@ -163,7 +242,7 @@ class face_analyze_task:
 def main():
     image_queue = queue.Queue()
     taskm = mqtt_task(image_queue)
-    taskf = face_analyze_task(image_queue)
+    taskf = face_analyze_task(image_queue, taskm)
 
     mqtt_thread = Thread(target=taskm.run)
     mqtt_thread.daemon = True

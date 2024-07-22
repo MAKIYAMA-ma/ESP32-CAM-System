@@ -10,8 +10,10 @@ static void callback(char *topic, byte *payload, unsigned int length);
 
 // MQTTブローカー
 const char *mqtt_broker = "192.168.0.8";
-const char *pub_topic = "esp32-cam/img";
-const char *sub_topic = "esp32-cam/control";
+const char *pub_topic = "esp32-cam/img/raw";
+const char *sub_topic = "esp32-cam/board/#";
+//const char *control_topic = "esp32-cam/board/control";
+//const char *setting_topic = "esp32-cam/board/setting";
 const char *mqtt_username = "testuser";
 const char *mqtt_password = "testpass";
 const int mqtt_port = 1883;
@@ -80,6 +82,7 @@ static void callback(char *topic, byte *payload, unsigned int length)
         Serial.print((char)payload[i]);
     }
     std::string result((char *)payload, (int)length);
+    // TODO topicによる切り分けとかどうしようか
     fifo.enqueue(result);
     Serial.println();
     Serial.println("-----------------------");
