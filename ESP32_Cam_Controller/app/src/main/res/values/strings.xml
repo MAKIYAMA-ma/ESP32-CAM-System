@@ -6,6 +6,11 @@
     <string name="interval_label">Interval</string>
     <string name="interval_unit">[msec]</string>
     <string name="interval_time_init">10000</string>
+    <string name="imaga_type_label">Image Type:</string>
     <string name="raw_image">RAW Image</string>
     <string name="processed_image">Processed Image</string>
+    <string name="send_path_label">Send Method:</string>
+    <string name="path_none">NOT send</string>
+    <string name="path_mail">Email</string>
+    <string name="path_mqtt">MQTT</string>
 </resources>

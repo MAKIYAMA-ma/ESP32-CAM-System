@@ -9,6 +9,7 @@ import android.widget.EditText
 import android.widget.CheckBox
 import android.widget.ImageView
 import android.widget.RadioGroup
+import android.widget.RadioButton
 import android.graphics.BitmapFactory
 import android.app.AlertDialog
 import androidx.activity.enableEdgeToEdge
@@ -23,6 +24,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var mqttClient: MqttAndroidClient
     private var topicEsp32CamControl = "esp32-cam/board/control"
     private var topicEsp32CamSetting = "esp32-cam/board/setting"
+    private var topicEsp32SvrSetting = "esp32-cam/server/setting"
     private var topicEsp32CamImage = "esp32-cam/img/#"
     private var topicEsp32CamRawImage = "esp32-cam/img/raw"
     private var topicEsp32CamProcessedImage = "esp32-cam/img/processed"
@@ -40,7 +42,27 @@ class MainActivity : AppCompatActivity() {
         }
 
         val imageTypeRadioGroup = findViewById<RadioGroup>(R.id.imageType_radioGroup)
+        val radioButtonProcessedImage = findViewById<RadioButton>(R.id.radioButton_processedImage)
+        val radioButtonRawImage = findViewById<RadioButton>(R.id.radioButton_rawImage)
+        val sendPathRadioGroup = findViewById<RadioGroup>(R.id.sendPath_radioGroup)
+        val radioButtonSendMqtt = findViewById<RadioButton>(R.id.radioButton_sendMqtt)
+
+        // ラジオボタンの連動設定
+        imageTypeRadioGroup.setOnCheckedChangeListener { _, checkedId ->
+            when (checkedId) {
+                R.id.radioButton_processedImage -> {
+                    // processedImage が選択された場合,MQTT固定
+                    radioButtonSendMqtt.isChecked = true
+                    setRadioGroupEnabled(sendPathRadioGroup, false)
+                }
+                R.id.radioButton_rawImage -> {
+                    // rawImage が選択された場合
+                    setRadioGroupEnabled(sendPathRadioGroup, true)
+                }
+            }
+        }
         imageTypeRadioGroup.check(R.id.radioButton_rawImage)
+        sendPathRadioGroup.check(R.id.radioButton_sendMqtt)
 
         val brokerUrl = "tcp://192.168.0.8:1883"
         val clientId = "ESP32-CAM-Controller"
@@ -195,6 +217,13 @@ class MainActivity : AppCompatActivity() {
         imageView.setImageBitmap(bitmap)
     }
 
+    private fun setRadioGroupEnabled(radioGroup: RadioGroup, enabled: Boolean) {
+        for (i in 0 until radioGroup.childCount) {
+            val child = radioGroup.getChildAt(i)
+            child.isEnabled = enabled
+        }
+    }
+
     // Listener
     private inner class ShotButtonListerner : View.OnClickListener {
         override fun onClick(view: View) {
@@ -206,11 +235,31 @@ class MainActivity : AppCompatActivity() {
         override fun onClick(view: View) {
             val cbIntervalEn = findViewById<CheckBox>(R.id.checkBox_intervalShot)
             val txtIntervalTime = findViewById<EditText>(R.id.editTextNumber)
+            val imageTypeRadioGroup = findViewById<RadioGroup>(R.id.imageType_radioGroup)
+            val imageTypeId = imageTypeRadioGroup.checkedRadioButtonId
+            val sendPathRadioGroup = findViewById<RadioGroup>(R.id.sendPath_radioGroup)
+            val sendPathId = sendPathRadioGroup.checkedRadioButtonId
 
             val enIntervalShot = if (cbIntervalEn.isChecked()) "true" else "false"
             val intervalTime = txtIntervalTime.getText().toString()
             val intervalTime_num = intervalTime.toIntOrNull()
 
+            // publish to server
+            var sendImagePath = "mqtt"
+            when(sendPathId) {
+                R.id.radioButton_noSend -> { sendImagePath = "none" }
+                R.id.radioButton_sendMail -> { sendImagePath = "mail" }
+                R.id.radioButton_sendMqtt -> { sendImagePath = "mqtt" }
+            }
+            showProcessedImage = (imageTypeId == R.id.radioButton_processedImage)
+            val sendProcessedImage = if (showProcessedImage) "processed" else "raw"
+            val payloadForSvr = "{ \"send_image\" : \"" + sendImagePath + "\", \"image_type\" : \"" + sendProcessedImage + "\" }";
+            publish(topicEsp32SvrSetting, payloadForSvr)
+
+            // TODO set send type
+            // If "show processed image" mode, MQTT must be selected
+
+            // publish to board
             if((intervalTime_num != null) && (intervalTime_num >= 5000)) {
                 val payload = "{ \"interval_shot\" : " + enIntervalShot + ", \"interval\" : " + intervalTime + "}";
                 publish(topicEsp32CamSetting, payload)
