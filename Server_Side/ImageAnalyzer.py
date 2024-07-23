@@ -209,33 +209,42 @@ class face_analyze_task:
 
                 if face_exist:
                     sims = comparotor.get_reg_sim(latest_filename)
-                    print(sims)
-                    max_sim = max([item for sublist in sims for item in sublist])
+                    sims_list = [item for sublist in sims for item in sublist]
+                    if len(sims_list) > 0:
+                        max_sim = max(sims_list)
+                    else:
+                        max_sim = 0
                     # 登録されている人が混じっているならOKとする
+                    unknown_detected = False
                     if max_sim > 0.35:
                         print("Registerd person detected[" + str(sims) + "]")
                     else:
                         msg = "NOT registerd person detected[" + str(sims) + "]"
                         print(msg)
-                        if mode.get_send_img_path() == 1:
-                            if mode.get_send_processed_img():
-                                notification.main("UNKNWON person was detected!!", msg, processed_filename)
-                            else:
-                                notification.main("UNKNWON person was detected!!", msg, latest_filename)
-                        elif mode.get_send_img_path() == 2:
-                            # send via MQTT
-                            image_data = None
-                            if mode.get_send_processed_img():
-                                with open(processed_filename, "rb") as image_file:
-                                    image_data = image_file.read()
-                            else:
-                                with open(latest_filename, "rb") as image_file:
-                                    image_data = image_file.read()
-
-                            if image_data is not None:
-                                self.taskm.publish(image_data)
+                        unknown_detected = True
                 else:
                     print("No person detected")
+
+                if mode.get_send_img_path() == 1:
+                    if face_exist:
+                        if mode.get_send_processed_img():
+                            notification.main("UNKNWON person was detected!!", msg, processed_filename)
+                        elif unknown_detected:
+                            # not send email when unknown has not detected
+                            notification.main("UNKNWON person was detected!!", msg, latest_filename)
+                elif mode.get_send_img_path() == 2:
+                    # send via MQTT
+                    if mode.get_send_processed_img() and face_exist:
+                        file_to_send = processed_filename
+                    else:
+                        file_to_send = latest_filename
+
+                    image_data = None
+                    with open(file_to_send, "rb") as image_file:
+                        image_data = image_file.read()
+
+                    if image_data is not None:
+                        self.taskm.publish(image_data)
         except KeyboardInterrupt:
             pass
 
