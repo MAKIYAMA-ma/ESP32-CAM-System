@@ -92,9 +92,9 @@ class mqtt_task:
                 mode.set_send_img_path(2)
 
             if image_type_value == "raw":
-                mode.set_send_img(False)
+                mode.set_send_processed_img(False)
             elif image_type_value == "processed":
-                mode.set_send_img(True)
+                mode.set_send_processed_img(True)
 
     def publish(self, payload):
         self.client.publish(self.topic_pub, payload=payload, qos=1, retain=False)
@@ -209,6 +209,7 @@ class face_analyze_task:
 
                 if face_exist:
                     sims = comparotor.get_reg_sim(latest_filename)
+                    print(sims)
                     max_sim = max([item for sublist in sims for item in sublist])
                     # 登録されている人が混じっているならOKとする
                     if max_sim > 0.35:
