@@ -12,12 +12,12 @@
         android:layout_width="320dp"
         android:layout_height="240dp"
         android:background="@drawable/border"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintVertical_bias="0.1"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.494"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.15"
 
         tools:srcCompat="@tools:sample/backgrounds/scenic" />
 
@@ -27,88 +27,138 @@
         android:layout_height="76dp"
         android:text="@string/shot_button"
         android:textSize="34sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/captureImage"
-        app:layout_constraintVertical_bias="0.435" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintVertical_bias="0.435"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <CheckBox
         android:id="@+id/checkBox_intervalShot"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="40dp"
         android:text="@string/en_intervalshot_cb"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.152"
-        app:layout_constraintStart_toStartOf="parent"
+        android:gravity="center"
         app:layout_constraintTop_toTopOf="@+id/shotButton"
-        app:layout_constraintVertical_bias="0.227" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintVertical_bias="0.235"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.064" />
 
     <EditText
         android:id="@+id/editTextNumber"
-        android:layout_width="157dp"
-        android:layout_height="42dp"
+        android:layout_width="117dp"
+        android:layout_height="40dp"
+        android:layout_marginEnd="104dp"
         android:ems="10"
         android:hint="(n >= 5000)[msec]"
         android:inputType="number"
         android:text="@string/interval_time_init"
+        android:gravity="center"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.542"
-        app:layout_constraintStart_toStartOf="@+id/textView_interval"
+        app:layout_constraintHorizontal_bias="0.994"
+        app:layout_constraintStart_toStartOf="@+id/checkBox_intervalShot"
         app:layout_constraintTop_toTopOf="@+id/checkBox_intervalShot"
-        app:layout_constraintVertical_bias="0.17" />
+        app:layout_constraintVertical_bias="0.0" />
 
     <TextView
         android:id="@+id/textView_intervalunit"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="40dp"
         android:text="@string/interval_unit"
-        android:textSize="18sp"
+        android:textSize="14sp"
+        android:gravity="center"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.911"
+        app:layout_constraintHorizontal_bias="0.744"
         app:layout_constraintStart_toStartOf="@+id/editTextNumber"
-        app:layout_constraintTop_toTopOf="@+id/checkBox_intervalShot"
-        app:layout_constraintVertical_bias="0.17" />
+        app:layout_constraintTop_toTopOf="@+id/editTextNumber"
+        app:layout_constraintVertical_bias="0.0" />
 
     <TextView
-        android:id="@+id/textView_interval"
-        android:layout_width="73dp"
-        android:layout_height="27dp"
-        android:text="@string/interval_label"
-        android:textSize="18sp"
+        android:id="@+id/textView_imageType"
+        android:layout_width="100dp"
+        android:layout_height="30dp"
+        android:text="@string/imaga_type_label"
+        android:textSize="14sp"
+        android:gravity="center"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.31"
+        app:layout_constraintHorizontal_bias="0.05"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/checkBox_intervalShot"
-        app:layout_constraintVertical_bias="0.172" />
+        app:layout_constraintVertical_bias="0.175" />
 
     <RadioGroup
         android:id="@+id/imageType_radioGroup"
-        android:layout_width="333dp"
-        android:layout_height="42dp"
+        android:layout_width="280dp"
+        android:layout_height="30dp"
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.487"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/textView_interval"
-        app:layout_constraintVertical_bias="0.264">
+        app:layout_constraintHorizontal_bias="0.87"
+        app:layout_constraintStart_toStartOf="@+id/textView_imageType"
+        app:layout_constraintTop_toTopOf="@+id/textView_imageType"
+        app:layout_constraintVertical_bias="0.0">
 
         <RadioButton
             android:id="@+id/radioButton_processedImage"
-            android:layout_width="169dp"
+            android:layout_width="150dp"
             android:layout_height="wrap_content"
             android:text="@string/processed_image" />
 
         <RadioButton
             android:id="@+id/radioButton_rawImage"
-            android:layout_width="149dp"
+            android:layout_width="130dp"
             android:layout_height="wrap_content"
             android:text="@string/raw_image" />
+    </RadioGroup>
+
+    <TextView
+        android:id="@+id/textView_sendPath"
+        android:layout_width="100dp"
+        android:layout_height="30dp"
+        android:text="@string/send_path_label"
+        android:textSize="14sp"
+        android:gravity="center"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.05"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/textView_imageType"
+        app:layout_constraintVertical_bias="0.16" />
+
+    <RadioGroup
+        android:id="@+id/sendPath_radioGroup"
+        android:layout_width="280dp"
+        android:layout_height="30dp"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.87"
+        app:layout_constraintStart_toStartOf="@+id/textView_sendPath"
+        app:layout_constraintTop_toTopOf="@+id/textView_sendPath"
+        app:layout_constraintVertical_bias="0.0">
+
+        <RadioButton
+            android:id="@+id/radioButton_noSend"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:text="@string/path_none" />
+
+        <RadioButton
+            android:id="@+id/radioButton_sendMail"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:text="@string/path_mail" />
+
+        <RadioButton
+            android:id="@+id/radioButton_sendMqtt"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:text="@string/path_mqtt" />
     </RadioGroup>
 
     <Button
@@ -120,7 +170,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/imageType_radioGroup"
-        app:layout_constraintVertical_bias="0.374" />
+        app:layout_constraintTop_toTopOf="@+id/sendPath_radioGroup"
+        app:layout_constraintVertical_bias="0.783" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
