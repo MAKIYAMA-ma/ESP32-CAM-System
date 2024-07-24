@@ -16,25 +16,18 @@ import json
 
 class mode_singleton:
     _instance = None
-    send_processed_img = False
-    send_img_path = 1       # 0: not send, 1: e-mail, 2: mqtt
+    en_warning_mail = True
 
     def __new__(cls, *args, **kwargs):
         if not cls._instance:
             cls._instance = super(mode_singleton, cls).__new__(cls, *args, **kwargs)
         return cls._instance
 
-    def set_send_processed_img(self, value):
-        mode_singleton.send_processed_img = value
+    def set_waining_mail(self, value):
+        mode_singleton.en_warning_mail = value
 
-    def get_send_processed_img(self):
-        return mode_singleton.send_processed_img
-
-    def set_send_img_path(self, value):
-        mode_singleton.send_img_path = value
-
-    def get_send_img_path(self):
-        return mode_singleton.send_img_path
+    def get_waining_mail(self):
+        return mode_singleton.en_warning_mail
 
 
 class mqtt_task:
@@ -44,7 +37,7 @@ class mqtt_task:
     topic_sub = 'esp32-cam/#'
     topic_control = 'esp32-cam/server/control'
     topic_setting = 'esp32-cam/server/setting'
-    topic_pub = 'esp32-cam/img/processed'
+    topic_pub = 'esp32-cam/img/analyzed'
     image_index = 0
     client_id = 'python-mqtt'
     client = None
@@ -82,19 +75,12 @@ class mqtt_task:
             # TODO
             mode = mode_singleton()
             received_data = json.loads(msg.payload)
-            send_image_value = received_data["send_image"]
-            image_type_value = received_data["image_type"]
-            if send_image_value == "none":
-                mode.set_send_img_path(0)
-            elif send_image_value == "mail":
-                mode.set_send_img_path(1)
-            elif send_image_value == "mqtt":
-                mode.set_send_img_path(2)
+            warning_mail_value = received_data.get("warning_mail", True)
+            mail_addr_value = received_data.get("mail_addr")
 
-            if image_type_value == "raw":
-                mode.set_send_processed_img(False)
-            elif image_type_value == "processed":
-                mode.set_send_processed_img(True)
+            mode.set_waining_mail(warning_mail_value)
+
+            # TODO handling of mail_addr_value
 
     def publish(self, payload):
         self.client.publish(self.topic_pub, payload=payload, qos=1, retain=False)
@@ -202,10 +188,7 @@ class face_analyze_task:
             while True:
                 latest_filename = self.queue.get()
 
-                if mode.get_send_processed_img():
-                    (face_exist, processed_filename) = self.face_location(latest_filename)
-                else:
-                    face_exist = self.face_exist(latest_filename)
+                (face_exist, processed_filename) = self.face_location(latest_filename)
 
                 if face_exist:
                     sims = comparotor.get_reg_sim(latest_filename)
@@ -215,36 +198,31 @@ class face_analyze_task:
                     else:
                         max_sim = 0
                     # 登録されている人が混じっているならOKとする
-                    unknown_detected = False
                     if max_sim > 0.35:
                         print("Registerd person detected[" + str(sims) + "]")
                     else:
                         msg = "NOT registerd person detected[" + str(sims) + "]"
                         print(msg)
-                        unknown_detected = True
+                        if mode.get_waining_mail():
+                            if mode.get_send_processed_img():
+                                notification.main("UNKNWON person was detected!!", msg, processed_filename)
+                            else:
+                                notification.main("UNKNWON person was detected!!", msg, latest_filename)
                 else:
                     print("No person detected")
 
-                if mode.get_send_img_path() == 1:
-                    if face_exist:
-                        if mode.get_send_processed_img():
-                            notification.main("UNKNWON person was detected!!", msg, processed_filename)
-                        elif unknown_detected:
-                            # not send email when unknown has not detected
-                            notification.main("UNKNWON person was detected!!", msg, latest_filename)
-                elif mode.get_send_img_path() == 2:
-                    # send via MQTT
-                    if mode.get_send_processed_img() and face_exist:
-                        file_to_send = processed_filename
-                    else:
-                        file_to_send = latest_filename
+                # send via MQTT
+                if processed_filename != "":
+                    file_to_send = processed_filename
+                else:
+                    file_to_send = latest_filename
 
-                    image_data = None
-                    with open(file_to_send, "rb") as image_file:
-                        image_data = image_file.read()
+                image_data = None
+                with open(file_to_send, "rb") as image_file:
+                    image_data = image_file.read()
 
-                    if image_data is not None:
-                        self.taskm.publish(image_data)
+                if image_data is not None:
+                    self.taskm.publish(image_data)
         except KeyboardInterrupt:
             pass
 

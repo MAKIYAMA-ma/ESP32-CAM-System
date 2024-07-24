@@ -77,89 +77,118 @@
         app:layout_constraintTop_toTopOf="@+id/editTextNumber"
         app:layout_constraintVertical_bias="0.0" />
 
-    <TextView
-        android:id="@+id/textView_imageType"
-        android:layout_width="100dp"
-        android:layout_height="30dp"
-        android:text="@string/imaga_type_label"
-        android:textSize="14sp"
+    <CheckBox
+        android:id="@+id/checkBox_warnMail"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:text="@string/en_warnmail_cb"
         android:gravity="center"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.05"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/checkBox_intervalShot"
-        app:layout_constraintVertical_bias="0.175" />
-
-    <RadioGroup
-        android:id="@+id/imageType_radioGroup"
-        android:layout_width="280dp"
-        android:layout_height="30dp"
-        android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintVertical_bias="0.15"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.87"
-        app:layout_constraintStart_toStartOf="@+id/textView_imageType"
-        app:layout_constraintTop_toTopOf="@+id/textView_imageType"
-        app:layout_constraintVertical_bias="0.0">
+        app:layout_constraintHorizontal_bias="0.064" />
 
-        <RadioButton
-            android:id="@+id/radioButton_processedImage"
-            android:layout_width="150dp"
-            android:layout_height="wrap_content"
-            android:text="@string/processed_image" />
-
-        <RadioButton
-            android:id="@+id/radioButton_rawImage"
-            android:layout_width="130dp"
-            android:layout_height="wrap_content"
-            android:text="@string/raw_image" />
-    </RadioGroup>
-
-    <TextView
-        android:id="@+id/textView_sendPath"
-        android:layout_width="100dp"
-        android:layout_height="30dp"
-        android:text="@string/send_path_label"
-        android:textSize="14sp"
+    <EditText
+        android:id="@+id/editMailAddr"
+        android:layout_width="180dp"
+        android:layout_height="40dp"
+        android:layout_marginEnd="104dp"
+        android:ems="10"
+        android:hint="Send TO"
+        android:inputType="textEmailAddress"
         android:gravity="center"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.05"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/textView_imageType"
-        app:layout_constraintVertical_bias="0.16" />
+        app:layout_constraintHorizontal_bias="1.6"
+        app:layout_constraintStart_toStartOf="@+id/checkBox_warnMail"
+        app:layout_constraintTop_toTopOf="@+id/checkBox_warnMail"
+        app:layout_constraintVertical_bias="0.0" />
 
-    <RadioGroup
-        android:id="@+id/sendPath_radioGroup"
-        android:layout_width="280dp"
-        android:layout_height="30dp"
-        android:orientation="horizontal"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.87"
-        app:layout_constraintStart_toStartOf="@+id/textView_sendPath"
-        app:layout_constraintTop_toTopOf="@+id/textView_sendPath"
-        app:layout_constraintVertical_bias="0.0">
+    <!-- <TextView -->
+    <!--     android:id="@+id/textView_imageType" -->
+    <!--     android:layout_width="100dp" -->
+    <!--     android:layout_height="30dp" -->
+    <!--     android:text="@string/imaga_type_label" -->
+    <!--     android:textSize="14sp" -->
+    <!--     android:gravity="center" -->
+    <!--     app:layout_constraintBottom_toBottomOf="parent" -->
+    <!--     app:layout_constraintEnd_toEndOf="parent" -->
+    <!--     app:layout_constraintHorizontal_bias="0.05" -->
+    <!--     app:layout_constraintStart_toStartOf="parent" -->
+    <!--     app:layout_constraintTop_toTopOf="@+id/checkBox_intervalShot" -->
+    <!--     app:layout_constraintVertical_bias="0.175" /> -->
 
-        <RadioButton
-            android:id="@+id/radioButton_noSend"
-            android:layout_width="100dp"
-            android:layout_height="wrap_content"
-            android:text="@string/path_none" />
+    <!-- <RadioGroup -->
+    <!--     android:id="@+id/imageType_radioGroup" -->
+    <!--     android:layout_width="280dp" -->
+    <!--     android:layout_height="30dp" -->
+    <!--     android:orientation="horizontal" -->
+    <!--     app:layout_constraintBottom_toBottomOf="parent" -->
+    <!--     app:layout_constraintEnd_toEndOf="parent" -->
+    <!--     app:layout_constraintHorizontal_bias="0.87" -->
+    <!--     app:layout_constraintStart_toStartOf="@+id/textView_imageType" -->
+    <!--     app:layout_constraintTop_toTopOf="@+id/textView_imageType" -->
+    <!--     app:layout_constraintVertical_bias="0.0"> -->
 
-        <RadioButton
-            android:id="@+id/radioButton_sendMail"
-            android:layout_width="100dp"
-            android:layout_height="wrap_content"
-            android:text="@string/path_mail" />
+    <!--     <RadioButton -->
+    <!--         android:id="@+id/radioButton_processedImage" -->
+    <!--         android:layout_width="150dp" -->
+    <!--         android:layout_height="wrap_content" -->
+    <!--         android:text="@string/processed_image" /> -->
 
-        <RadioButton
-            android:id="@+id/radioButton_sendMqtt"
-            android:layout_width="100dp"
-            android:layout_height="wrap_content"
-            android:text="@string/path_mqtt" />
-    </RadioGroup>
+    <!--     <RadioButton -->
+    <!--         android:id="@+id/radioButton_rawImage" -->
+    <!--         android:layout_width="130dp" -->
+    <!--         android:layout_height="wrap_content" -->
+    <!--         android:text="@string/raw_image" /> -->
+    <!-- </RadioGroup> -->
+
+    <!-- <TextView -->
+    <!--     android:id="@+id/textView_sendPath" -->
+    <!--     android:layout_width="100dp" -->
+    <!--     android:layout_height="30dp" -->
+    <!--     android:text="@string/send_path_label" -->
+    <!--     android:textSize="14sp" -->
+    <!--     android:gravity="center" -->
+    <!--     app:layout_constraintBottom_toBottomOf="parent" -->
+    <!--     app:layout_constraintEnd_toEndOf="parent" -->
+    <!--     app:layout_constraintHorizontal_bias="0.05" -->
+    <!--     app:layout_constraintStart_toStartOf="parent" -->
+    <!--     app:layout_constraintTop_toTopOf="@+id/textView_imageType" -->
+    <!--     app:layout_constraintVertical_bias="0.16" /> -->
+
+    <!-- <RadioGroup -->
+    <!--     android:id="@+id/sendPath_radioGroup" -->
+    <!--     android:layout_width="280dp" -->
+    <!--     android:layout_height="30dp" -->
+    <!--     android:orientation="horizontal" -->
+    <!--     app:layout_constraintBottom_toBottomOf="parent" -->
+    <!--     app:layout_constraintEnd_toEndOf="parent" -->
+    <!--     app:layout_constraintHorizontal_bias="0.87" -->
+    <!--     app:layout_constraintStart_toStartOf="@+id/textView_sendPath" -->
+    <!--     app:layout_constraintTop_toTopOf="@+id/textView_sendPath" -->
+    <!--     app:layout_constraintVertical_bias="0.0"> -->
+
+    <!--     <RadioButton -->
+    <!--         android:id="@+id/radioButton_noSend" -->
+    <!--         android:layout_width="100dp" -->
+    <!--         android:layout_height="wrap_content" -->
+    <!--         android:text="@string/path_none" /> -->
+
+    <!--     <RadioButton -->
+    <!--         android:id="@+id/radioButton_sendMail" -->
+    <!--         android:layout_width="100dp" -->
+    <!--         android:layout_height="wrap_content" -->
+    <!--         android:text="@string/path_mail" /> -->
+
+    <!--     <RadioButton -->
+    <!--         android:id="@+id/radioButton_sendMqtt" -->
+    <!--         android:layout_width="100dp" -->
+    <!--         android:layout_height="wrap_content" -->
+    <!--         android:text="@string/path_mqtt" /> -->
+    <!-- </RadioGroup> -->
 
     <Button
         android:id="@+id/settingButton"
@@ -170,7 +199,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/sendPath_radioGroup"
-        app:layout_constraintVertical_bias="0.783" />
+        app:layout_constraintTop_toTopOf="@+id/checkBox_warnMail"
+        app:layout_constraintVertical_bias="0.4" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
