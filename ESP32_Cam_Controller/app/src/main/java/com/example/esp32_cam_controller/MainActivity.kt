@@ -35,6 +35,9 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
+        val cbWarningMainEn = findViewById<CheckBox>(R.id.checkBox_warnMail)
+        cbWarningMainEn.isChecked = true
+
         val brokerUrl = "tcp://192.168.0.8:1883"
         val clientId = "ESP32-CAM-Controller"
         mqttClient = MqttAndroidClient(this, brokerUrl, clientId)
@@ -201,7 +204,7 @@ class MainActivity : AppCompatActivity() {
             val enWarningMail = if (cbWarningMainEn.isChecked()) "true" else "false"
             val mailAddr = txtMailAddr.getText().toString()
 
-            val payloadForSvr = "{ \"warning_mail\" : " + enWarningMail + ", \"mail_addr\" : " + mailAddr + "}";
+            val payloadForSvr = "{ \"warning_mail\" : " + enWarningMail + ", \"mail_addr\" : \"" + mailAddr + "\" }";
             publish(topicEsp32SvrSetting, payloadForSvr)
 
             // publish to board
