@@ -1,8 +1,8 @@
 */tags
 ESP32_Cam_FW/wifi_setting.h
 ESP32CAMシステム.md
-Server_Side/Data
-Server_Side/result
-Server_Side/sample
-Server_Side/register
-Server_Side/email_setting.py
+ESP32_Cam_AnalysisServer/Data
+ESP32_Cam_AnalysisServer/result
+ESP32_Cam_AnalysisServer/sample
+ESP32_Cam_AnalysisServer/register
+ESP32_Cam_AnalysisServer/email_setting.py
