@@ -34,7 +34,8 @@ class mqtt_task:
     host = '192.168.0.8'  # MQTT Broker
     port = 1883  # MQTT Port
     topic_img = 'esp32-cam/img/raw'
-    topic_sub = 'esp32-cam/#'
+    # topic_sub = 'esp32-cam/#'
+    topic_sub = 'esp32-cam/server/#'
     topic_control = 'esp32-cam/server/control'
     topic_setting = 'esp32-cam/server/setting'
     topic_pub = 'esp32-cam/img/analyzed'
@@ -50,6 +51,7 @@ class mqtt_task:
     def on_connect(self, client, userdata, flags, respons_code):
         print('status {0}'.format(respons_code))
         client.subscribe(self.topic_sub)
+        client.subscribe(self.topic_img)
 
     # 受信したバイナリデータを output.jpg として保存する関数
     def on_message(self, client, userdata, msg):
@@ -189,6 +191,10 @@ class face_analyze_task:
                 latest_filename = self.queue.get()
 
                 (face_exist, processed_filename) = self.face_location(latest_filename)
+                if processed_filename != "":
+                    file_to_send = processed_filename
+                else:
+                    file_to_send = latest_filename
 
                 if face_exist:
                     sims = comparotor.get_reg_sim(latest_filename)
@@ -204,19 +210,11 @@ class face_analyze_task:
                         msg = "NOT registerd person detected[" + str(sims) + "]"
                         print(msg)
                         if mode.get_waining_mail():
-                            if mode.get_send_processed_img():
-                                notification.main("UNKNWON person was detected!!", msg, processed_filename)
-                            else:
-                                notification.main("UNKNWON person was detected!!", msg, latest_filename)
+                            notification.main("UNKNWON person was detected!!", msg, file_to_send)
                 else:
                     print("No person detected")
 
                 # send via MQTT
-                if processed_filename != "":
-                    file_to_send = processed_filename
-                else:
-                    file_to_send = latest_filename
-
                 image_data = None
                 with open(file_to_send, "rb") as image_file:
                     image_data = image_file.read()
