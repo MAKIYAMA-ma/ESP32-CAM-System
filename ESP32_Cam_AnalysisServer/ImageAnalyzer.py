@@ -10,13 +10,14 @@ import queue
 # import compare_face
 from compare_face import Comparator
 # import util
-import notification
+from notification import Mailer
 import json
 
 
 class mode_singleton:
     _instance = None
     en_warning_mail = True
+    mailer = Mailer()
 
     def __new__(cls, *args, **kwargs):
         if not cls._instance:
@@ -28,6 +29,12 @@ class mode_singleton:
 
     def get_waining_mail(self):
         return mode_singleton.en_warning_mail
+
+    def get_mailer(self):
+        return mode_singleton.mailer
+
+    def set_mailer_to(self, addr: str):
+        self.mailer.set_to(addr)
 
 
 class mqtt_task:
@@ -81,8 +88,7 @@ class mqtt_task:
             mail_addr_value = received_data.get("mail_addr")
 
             mode.set_waining_mail(warning_mail_value)
-
-            # TODO handling of mail_addr_value
+            mode.set_mailer_to(mail_addr_value)
 
     def publish(self, payload):
         self.client.publish(self.topic_pub, payload=payload, qos=1, retain=False)
@@ -210,7 +216,7 @@ class face_analyze_task:
                         msg = "NOT registerd person detected[" + str(sims) + "]"
                         print(msg)
                         if mode.get_waining_mail():
-                            notification.main("UNKNWON person was detected!!", msg, file_to_send)
+                            mode.get_mailer().main("UNKNWON person was detected!!", msg, file_to_send)
                 else:
                     print("No person detected")
 

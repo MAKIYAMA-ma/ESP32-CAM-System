@@ -9,36 +9,44 @@ import ssl
 import os
 
 
-def create_message_body(title: str, body: str, attach_file: str = None):
-    msg = MIMEMultipart()
-    msg["Subject"] = title
-    msg["From"] = email_setting.from_address
-    msg["To"] = email_setting.to_address
-    msg.attach(MIMEText(body))
+class Mailer:
+    def __init__(self, to_address: str = None):
+        if to_address is not None:
+            self.to_address = to_address
+        else:
+            self.to_address = email_setting.to_address
 
-    if attach_file is not None:
-        filename = os.path.basename(attach_file)
-        with open(attach_file, 'rb') as f:
-            attach = MIMEApplication(f.read())
+    def set_to(self, to_address: str):
+        self.to_address = to_address
 
-        attach.add_header('Content-Disposition', 'attachment', filename=filename)
-        msg.attach(attach)
+    def create_message_body(self, title: str, body: str, attach_file: str = None):
+        msg = MIMEMultipart()
+        msg["Subject"] = title
+        msg["From"] = email_setting.from_address
+        msg["To"] = self.to_address
+        msg.attach(MIMEText(body))
 
-    return msg
+        if attach_file is not None:
+            filename = os.path.basename(attach_file)
+            with open(attach_file, 'rb') as f:
+                attach = MIMEApplication(f.read())
 
+            attach.add_header('Content-Disposition', 'attachment', filename=filename)
+            msg.attach(attach)
 
-def send_mail(msg: EmailMessage):
-    context = ssl.create_default_context()
-    # with smtplib.SMTP(email_setting.smtp_host, email_setting.smtp_port) as server:
-    with smtplib.SMTP_SSL(email_setting.smtp_host, email_setting.smtp_port, context=context) as server:
-        server.ehlo()
-        print("Support:", server.esmtp_features)
-        server.login(email_setting.username, email_setting.password)
-        server.send_message(msg)
+        return msg
 
+    def send_mail(self, msg: EmailMessage):
+        context = ssl.create_default_context()
+        # with smtplib.SMTP(email_setting.smtp_host, email_setting.smtp_port) as server:
+        with smtplib.SMTP_SSL(email_setting.smtp_host, email_setting.smtp_port, context=context) as server:
+            server.ehlo()
+            print("Support:", server.esmtp_features)
+            server.login(email_setting.username, email_setting.password)
+            server.send_message(msg)
 
-def main(title: str, body: str, attach_file: str = None):
-    send_mail(create_message_body(title, body, attach_file))
+    def main(self, title: str, body: str, attach_file: str = None):
+        self.send_mail(self.create_message_body(title, body, attach_file))
 
 
 if __name__ == "__main__":
@@ -53,4 +61,5 @@ if __name__ == "__main__":
     else:
         attach_file = None
 
-    main(title, message, attach_file)
+    mailer = Mailer()
+    mailer.main(title, message, attach_file)
