@@ -21,15 +21,28 @@
 
         tools:srcCompat="@tools:sample/backgrounds/scenic" />
 
+    <TextView
+        android:id="@+id/textView_timestamp"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:text=""
+        android:textSize="20sp"
+        android:gravity="center"
+        app:layout_constraintTop_toTopOf="@+id/captureImage"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintVertical_bias="0.35"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <Button
         android:id="@+id/shotButton"
         android:layout_width="201dp"
         android:layout_height="76dp"
         android:text="@string/shot_button"
         android:textSize="34sp"
-        app:layout_constraintTop_toTopOf="@+id/captureImage"
+        app:layout_constraintTop_toTopOf="@+id/textView_timestamp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintVertical_bias="0.435"
+        app:layout_constraintVertical_bias="0.15"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
@@ -41,7 +54,7 @@
         android:gravity="center"
         app:layout_constraintTop_toTopOf="@+id/shotButton"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintVertical_bias="0.235"
+        app:layout_constraintVertical_bias="0.3"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.064" />

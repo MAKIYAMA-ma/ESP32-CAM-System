@@ -8,6 +8,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.CheckBox
 import android.widget.ImageView
+import android.widget.TextView
 import android.graphics.BitmapFactory
 import android.app.AlertDialog
 import androidx.activity.enableEdgeToEdge
@@ -17,6 +18,8 @@ import androidx.core.view.WindowInsetsCompat
 import info.mqtt.android.service.MqttAndroidClient
 import org.eclipse.paho.client.mqttv3.*
 import android.content.IntentFilter
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
     private lateinit var mqttClient: MqttAndroidClient
@@ -57,14 +60,27 @@ class MainActivity : AppCompatActivity() {
 
             override fun messageArrived(topic: String?, message: MqttMessage?) {
                 println("Message arrived: ${message?.toString()}")
-                // image data is received
-                message?.payload?.let {
-                    runOnUiThread {
-                        displayImage(it)
+
+                message?.payload?.let { payload ->
+                    // timestamp:YYYYMMDDHHmmSS
+                    val timestampLength = 14
+                    if (payload.size >= timestampLength) {
+                        val timestampBytes = payload.copyOfRange(0, timestampLength)
+                        val timestamp = String(timestampBytes, Charsets.UTF_8)
+
+                        val imageData = payload.copyOfRange(timestampLength, payload.size)
+
+                        println("Timestamp: $timestamp")
+
+                        runOnUiThread {
+                            displayImage(imageData)
+                            displayTimestamp(timestamp)
+                        }
+                    } else {
+                        println("Received payload is too short to contain a timestamp.")
                     }
                 }
             }
-
             override fun deliveryComplete(token: IMqttDeliveryToken?) {
                 println("Delivery complete")
             }
@@ -186,6 +202,19 @@ class MainActivity : AppCompatActivity() {
         val bitmap = BitmapFactory.decodeByteArray(imageData, 0, imageData.size)
         val imageView: ImageView = findViewById(R.id.captureImage)
         imageView.setImageBitmap(bitmap)
+    }
+
+    private fun displayTimestamp(timestamp: String) {
+        val textView: TextView = findViewById(R.id.textView_timestamp)
+
+        val inputFormat = SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault())
+        val outputFormat = SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault())
+
+        // タイムスタンプをDate型に変換
+        val date = inputFormat.parse(timestamp)
+
+        // Date型を指定のフォーマットの文字列に変換して表示
+        textView.text = outputFormat.format(date)
     }
 
     // Listener

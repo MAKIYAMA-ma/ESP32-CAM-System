@@ -202,6 +202,11 @@ class face_analyze_task:
                 else:
                     file_to_send = latest_filename
 
+                # ファイル名部分が日時
+                # 本当はBoard側で撮影の瞬間のタイムスタンプをつけたいが
+                # RTCとかないので。。。
+                timestamp = os.path.splitext(os.path.basename(latest_filename))[0]
+
                 if face_exist:
                     sims = comparotor.get_reg_sim(latest_filename)
                     sims_list = [item for sublist in sims for item in sublist]
@@ -213,7 +218,8 @@ class face_analyze_task:
                     if max_sim > 0.35:
                         print("Registerd person detected[" + str(sims) + "]")
                     else:
-                        msg = "NOT registerd person detected[" + str(sims) + "]"
+                        msg = "NOT registerd person detected[" + str(sims) + "]\n"
+                        msg = msg + "time:" + timestamp
                         print(msg)
                         if mode.get_waining_mail():
                             mode.get_mailer().main("UNKNWON person was detected!!", msg, file_to_send)
@@ -226,7 +232,8 @@ class face_analyze_task:
                     image_data = image_file.read()
 
                 if image_data is not None:
-                    self.taskm.publish(image_data)
+                    timestamp_bytedata = timestamp.replace('_', '').encode('utf-8')
+                    self.taskm.publish(timestamp_bytedata + image_data)
         except KeyboardInterrupt:
             pass
 
