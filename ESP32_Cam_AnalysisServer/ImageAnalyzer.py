@@ -38,22 +38,24 @@ class mode_singleton:
 
 
 class mqtt_task:
+    client = None
+    queue = None
+
+    # MQTT parameters
     host = '192.168.0.8'  # MQTT Broker
     port = 1883  # MQTT Port
     topic_img = 'esp32-cam/img/raw'
-    # topic_sub = 'esp32-cam/#'
     topic_sub = 'esp32-cam/server/#'
     topic_control = 'esp32-cam/server/control'
     topic_setting = 'esp32-cam/server/setting'
     topic_pub = 'esp32-cam/img/analyzed'
-    image_index = 0
     client_id = 'python-mqtt'
-    client = None
-
-    queue = None
 
     def __init__(self, queue):
         self.queue = queue
+        self.client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1, self.client_id)
+        self.client.on_connect = self.on_connect
+        self.client.on_message = self.on_message
 
     def on_connect(self, client, userdata, flags, respons_code):
         print('status {0}'.format(respons_code))
@@ -76,28 +78,19 @@ class mqtt_task:
             print(filename + " is saved")
 
             self.queue.put(filepath, timeout=1)
-            self.image_index = self.image_index + 1
         elif msg.topic == self.topic_control:
             # NOP
             pass
         elif msg.topic == self.topic_setting:
-            # TODO
             mode = mode_singleton()
             received_data = json.loads(msg.payload)
-            warning_mail_value = received_data.get("warning_mail", True)
-            mail_addr_value = received_data.get("mail_addr")
-
-            mode.set_waining_mail(warning_mail_value)
-            mode.set_mailer_to(mail_addr_value)
+            mode.set_waining_mail(received_data.get("warning_mail", True))
+            mode.set_mailer_to(received_data.get("mail_addr"))
 
     def publish(self, payload):
         self.client.publish(self.topic_pub, payload=payload, qos=1, retain=False)
 
     def run(self):
-        # client = mqtt.Client(protocol=mqtt.MQTTv311)
-        self.client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1, self.client_id)
-        self.client.on_connect = self.on_connect
-        self.client.on_message = self.on_message
         self.client.connect(self.host, port=self.port, keepalive=60)
         self.client.loop_forever()
 
