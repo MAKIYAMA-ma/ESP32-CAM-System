@@ -42,8 +42,12 @@
 //#define CAMERA_MODEL_ESP32S3_CAM_LCD
 
 #define SD_MMC_CMD 15 //Please do not modify it.
-#define SD_MMC_CLK 14 //Please do not modify it. 
+#define SD_MMC_CLK 14 //Please do not modify it.
 #define SD_MMC_D0  2  //Please do not modify it.
+
+#define HUMAN_SENSOR  13
+// #define HIGH 1
+// #define LOW  0
 
 #include "camera_pins.h"
 #include "camera_app.h"
@@ -57,6 +61,7 @@ static void sdcard_init(void);
 #endif
 
 void setup() {
+    pinMode(HUMAN_SENSOR, INPUT);
     Serial.begin(115200);
     Serial.setDebugOutput(true);
     Serial.println();
@@ -113,6 +118,13 @@ void loop() {
     static int64_t interval = CAPTURE_INTERVAL;
     static bool interval_shot = false;
     bool capture = false;
+
+    static int64_t latest_level = LOW;
+    int64_t cur_level = digitalRead(HUMAN_SENSOR);
+    if(latest_level != cur_level) {
+        Serial.println("HUMANSENSOR:" + String(cur_level));
+        latest_level = cur_level;
+    }
 
 #ifdef USE_BLT_CMD
     // get received command via bluetooth
