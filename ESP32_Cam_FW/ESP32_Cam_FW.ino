@@ -117,14 +117,11 @@ void loop() {
     int64_t current_time;
     static int64_t interval = CAPTURE_INTERVAL;
     static bool interval_shot = false;
+    static bool human_sensor = false;
     bool capture = false;
 
     static int64_t latest_level = LOW;
-    int64_t cur_level = digitalRead(HUMAN_SENSOR);
-    if(latest_level != cur_level) {
-        Serial.println("HUMANSENSOR:" + String(cur_level));
-        latest_level = cur_level;
-    }
+    int64_t cur_level;
 
 #ifdef USE_BLT_CMD
     // get received command via bluetooth
@@ -164,6 +161,15 @@ void loop() {
             if(doc.containsKey("interval")) {
                 interval = doc["interval"];
             }
+            if(doc.containsKey("human_sensor")) {
+                human_sensor = doc["human_sensor"];
+                if(human_sensor) {
+                    Serial.println("enable human_sensor shot");
+                    latest_level = LOW;
+                } else {
+                    Serial.println("disable human_sensor shot");
+                }
+            }
         }
     }
 
@@ -173,6 +179,16 @@ void loop() {
             Serial.printf("Current time[%d]\n", current_time);
             capture = true;
         }
+    }
+
+    if(human_sensor) {
+        cur_level = digitalRead(HUMAN_SENSOR);
+        if((latest_level == LOW) && (cur_level == HIGH)) {
+            Serial.printf("New motion is detected\n");
+            capture = true;
+        }
+
+        latest_level = cur_level;
     }
 
     if(capture) {

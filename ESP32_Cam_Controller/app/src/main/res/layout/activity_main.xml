@@ -91,14 +91,27 @@
         app:layout_constraintVertical_bias="0.0" />
 
     <CheckBox
+        android:id="@+id/checkBox_humanSensor"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:text="@string/en_humansensor_cb"
+        android:gravity="center"
+        app:layout_constraintTop_toBottomOf="@+id/checkBox_intervalShot"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintVertical_bias="0.03"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.064" />
+
+    <CheckBox
         android:id="@+id/checkBox_warnMail"
         android:layout_width="wrap_content"
         android:layout_height="40dp"
         android:text="@string/en_warnmail_cb"
         android:gravity="center"
-        app:layout_constraintTop_toTopOf="@+id/checkBox_intervalShot"
+        app:layout_constraintTop_toBottomOf="@+id/checkBox_humanSensor"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintVertical_bias="0.15"
+        app:layout_constraintVertical_bias="0.03"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.064" />

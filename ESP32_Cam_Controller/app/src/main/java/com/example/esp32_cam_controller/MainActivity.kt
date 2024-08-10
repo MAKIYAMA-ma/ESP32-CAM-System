@@ -239,12 +239,16 @@ class MainActivity : AppCompatActivity() {
             // publish to board
             val cbIntervalEn = findViewById<CheckBox>(R.id.checkBox_intervalShot)
             val txtIntervalTime = findViewById<EditText>(R.id.editTextNumber)
+            val cbHumansensorEn = findViewById<CheckBox>(R.id.checkBox_humanSensor)
 
             val enIntervalShot = if (cbIntervalEn.isChecked()) "true" else "false"
             val intervalTime = txtIntervalTime.getText().toString()
             val intervalTime_num = intervalTime.toIntOrNull()
+            val enHumanSensor = if (cbHumansensorEn.isChecked()) "true" else "false"
             if((intervalTime_num != null) && (intervalTime_num >= 5000)) {
-                val payloadForBoard = "{ \"interval_shot\" : " + enIntervalShot + ", \"interval\" : " + intervalTime + "}";
+                val payloadForBoard = "{ \"interval_shot\" : " + enIntervalShot +
+                                        ", \"interval\" : " + intervalTime +
+                                        ", \"human_sensor\" : " + enHumanSensor + "}";
                 publish(topicEsp32CamSetting, payloadForBoard)
                 AlertDialog.Builder(context)
                     .setTitle("message has been published")
