@@ -26,7 +26,8 @@ class MainActivity : AppCompatActivity() {
     private var topicEsp32CamControl = "esp32-cam/board/control"
     private var topicEsp32CamSetting = "esp32-cam/board/setting"
     private var topicEsp32SvrSetting = "esp32-cam/server/setting"
-    private var topicEsp32CamImage = "esp32-cam/img/analyzed"
+    private var topicEsp32CamImage   = "esp32-cam/img/analyzed"
+    private var topicEsp32CurSetting = "esp32-cam/controller/setting"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,7 +49,8 @@ class MainActivity : AppCompatActivity() {
             override fun connectComplete(reconnect: Boolean, serverURI: String) {
                 if (reconnect) {
                     println("Reconnected to: $serverURI")
-                    subscribe(topicEsp32CamImage)   // TODO 利用するのは常にどちらか一方。必要な方のみsubscribeするほうが良い。
+                    subscribe(topicEsp32CamImage)
+                    subscribe(topicEsp32CurSetting)
                 } else {
                     println("Connection to: $serverURI")
                 }
@@ -61,23 +63,31 @@ class MainActivity : AppCompatActivity() {
             override fun messageArrived(topic: String?, message: MqttMessage?) {
                 println("Message arrived: ${message?.toString()}")
 
-                message?.payload?.let { payload ->
-                    // timestamp:YYYYMMDDHHmmSS
-                    val timestampLength = 14
-                    if (payload.size >= timestampLength) {
-                        val timestampBytes = payload.copyOfRange(0, timestampLength)
-                        val timestamp = String(timestampBytes, Charsets.UTF_8)
+                topic?.let {
+                    if(topic == topicEsp32CamImage) {
+                        message?.payload?.let { payload ->
+                            // timestamp:YYYYMMDDHHmmSS
+                            val timestampLength = 14
+                            if (payload.size >= timestampLength) {
+                                val timestampBytes = payload.copyOfRange(0, timestampLength)
+                                val timestamp = String(timestampBytes, Charsets.UTF_8)
 
-                        val imageData = payload.copyOfRange(timestampLength, payload.size)
+                                val imageData = payload.copyOfRange(timestampLength, payload.size)
 
-                        println("Timestamp: $timestamp")
+                                println("Timestamp: $timestamp")
 
-                        runOnUiThread {
-                            displayImage(imageData)
-                            displayTimestamp(timestamp)
+                                runOnUiThread {
+                                    displayImage(imageData)
+                                    displayTimestamp(timestamp)
+                                }
+                            } else {
+                                println("Received payload is too short to contain a timestamp.")
+                            }
                         }
+                    } else if(topic == topicEsp32CurSetting) {
+                        // TODO
                     } else {
-                        println("Received payload is too short to contain a timestamp.")
+                        // Unknown message
                     }
                 }
             }
@@ -119,6 +129,7 @@ class MainActivity : AppCompatActivity() {
 
                     // start subscribe image data
                     subscribe(topicEsp32CamImage)
+                    subscribe(topicEsp32CurSetting)
                 }
 
                 override fun onFailure(asyncActionToken: IMqttToken?, exception: Throwable?) {

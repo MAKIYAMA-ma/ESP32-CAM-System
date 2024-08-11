@@ -113,14 +113,15 @@ TODO Sequence Diaglam
 TODO setting about MQTT
 
 ### MQTT Messages
-| topic                    | payload                    | from   | to     | note                        |
-|--------------------------|----------------------------|--------|--------|-----------------------------|
-| esp32-cam/img/raw        | captured image data        | Board  | Server |                             |
-| esp32-cam/img/analyzed   | analyzed image data        | Server | App    | used if set to send         |
-| esp32-cam/board/setting  | change setting of board    | App    | Board  |                             |
-| esp32-cam/board/control  | control message for board  | App    | Board  |                             |
-| esp32-cam/server/setting | change setting of server   | App    | Server |                             |
-| esp32-cam/server/control | control message for server | App    | Server | it is not used but reserved |
+| topic                        | payload                    | from         | to     | note                        |
+|------------------------------|----------------------------|--------------|--------|-----------------------------|
+| esp32-cam/img/raw            | captured image data        | Board        | Server |                             |
+| esp32-cam/img/analyzed       | analyzed image data        | Server       | App    | used if set to send         |
+| esp32-cam/board/setting      | change setting of board    | App          | Board  |                             |
+| esp32-cam/board/control      | control message for board  | App          | Board  |                             |
+| esp32-cam/server/setting     | change setting of server   | App          | Server |                             |
+| esp32-cam/server/control     | control message for server | App          | Server | it is not used but reserved |
+| esp32-cam/controller/setting | current settings           | Board/Server | App    |                             |
 
 #### esp32-cam/board/setting
 
@@ -131,13 +132,24 @@ TODO setting about MQTT
 
 #### esp32-cam/board/control
 
-| key  | value | note                 |
-|------|-------|----------------------|
-| shot | true  | take onetime capture |
+| key    | value | note                     |
+|--------|-------|--------------------------|
+| shot   | true  | take onetime capture     |
+| reqset | true  | require current settings |
 
 #### esp32-cam/server/setting
 
 | key           | value            | note                                                                                                     |
 |---------------|------------------|----------------------------------------------------------------------------------------------------------|
+| warning_email | true/false       | send image with e-mail if unknown faces have been detected<br>(and there is no face which is registered) |
+| email_address | [address string] | destination email address to which warning email is sent                                                 |
+| reqset        | true             | require current settings                                                                                 |
+
+#### esp32-cam/controller/setting
+
+| key           | value            | note                                                                                                     |
+|---------------|------------------|----------------------------------------------------------------------------------------------------------|
+| interval_shot | true/false       | enable/disable interval shot                                                                             |
+| interval      | number (>0)      | interval time [msec] for executing interval shot                                                         |
 | warning_email | true/false       | send image with e-mail if unknown faces have been detected<br>(and there is no face which is registered) |
 | email_address | [address string] | destination email address to which warning email is sent                                                 |
