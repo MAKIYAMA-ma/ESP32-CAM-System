@@ -99,11 +99,15 @@ TODO setting about MQTT
 
 #### esp32-cam/server/setting
 
-| key           | value            | note                                                                                                     |
-|---------------|------------------|----------------------------------------------------------------------------------------------------------|
-| warning_email | true/false       | send image with e-mail if unknown faces have been detected<br>(and there is no face which is registered) |
-| email_address | [address string] | destination email address to which warning email is sent                                                 |
-| reqset        | true             | require current settings                                                                                 |
+| key          | value            | note                                                                                                     |
+|--------------|------------------|----------------------------------------------------------------------------------------------------------|
+| warning_mail | true/false       | send image with e-mail if unknown faces have been detected<br>(and there is no face which is registered) |
+| mail_addr    | [address string] | destination email address to which warning email is sent                                                 |
+
+#### esp32-cam/server/control
+| key    | value | note                     |
+|--------|-------|--------------------------|
+| reqset | true  | require current settings |
 
 #### esp32-cam/controller/setting
 
@@ -111,5 +115,5 @@ TODO setting about MQTT
 |---------------|------------------|----------------------------------------------------------------------------------------------------------|
 | interval_shot | true/false       | enable/disable interval shot                                                                             |
 | interval      | number (>0)      | interval time [msec] for executing interval shot                                                         |
-| warning_email | true/false       | send image with e-mail if unknown faces have been detected<br>(and there is no face which is registered) |
-| email_address | [address string] | destination email address to which warning email is sent                                                 |
+| warning_mail  | true/false       | send image with e-mail if unknown faces have been detected<br>(and there is no face which is registered) |
+| mail_addr     | [address string] | destination email address to which warning email is sent                                                 |

@@ -19,6 +19,9 @@ class Mailer:
     def set_to(self, to_address: str):
         self.to_address = to_address
 
+    def get_to(self):
+        return self.to_address
+
     def create_message_body(self, title: str, body: str, attach_file: str = None):
         msg = MIMEMultipart()
         msg["Subject"] = title

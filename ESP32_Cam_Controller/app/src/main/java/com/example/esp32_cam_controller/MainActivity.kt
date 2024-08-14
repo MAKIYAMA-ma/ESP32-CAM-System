@@ -1,30 +1,33 @@
 package com.example.esp32_cam_controller
 
-import android.os.Bundle
+import android.app.AlertDialog
 import android.content.Context
+import android.content.IntentFilter
+import android.graphics.BitmapFactory
+import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Button
-import android.widget.EditText
 import android.widget.CheckBox
+import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
-import android.graphics.BitmapFactory
-import android.app.AlertDialog
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import info.mqtt.android.service.MqttAndroidClient
-import org.eclipse.paho.client.mqttv3.*
-import android.content.IntentFilter
 import java.text.SimpleDateFormat
 import java.util.Locale
+import kotlinx.serialization.*
+import kotlinx.serialization.json.*
+import org.eclipse.paho.client.mqttv3.*
 
 class MainActivity : AppCompatActivity() {
     private lateinit var mqttClient: MqttAndroidClient
     private var topicEsp32CamControl = "esp32-cam/board/control"
     private var topicEsp32CamSetting = "esp32-cam/board/setting"
+    private var topicEsp32SvrControl = "esp32-cam/server/control"
     private var topicEsp32SvrSetting = "esp32-cam/server/setting"
     private var topicEsp32CamImage   = "esp32-cam/img/analyzed"
     private var topicEsp32CurSetting = "esp32-cam/controller/setting"
@@ -42,7 +45,8 @@ class MainActivity : AppCompatActivity() {
         val cbWarningMainEn = findViewById<CheckBox>(R.id.checkBox_warnMail)
         cbWarningMainEn.isChecked = true
 
-        val brokerUrl = "tcp://192.168.0.8:1883"
+        val brokerUrl = "tcp://192.168.1.5:1883"
+        // val brokerUrl = "tcp://192.168.0.8:1883"
         val clientId = "ESP32-CAM-Controller"
         mqttClient = MqttAndroidClient(this, brokerUrl, clientId)
         mqttClient.setCallback(object : MqttCallbackExtended {
@@ -85,7 +89,55 @@ class MainActivity : AppCompatActivity() {
                             }
                         }
                     } else if(topic == topicEsp32CurSetting) {
-                        // TODO
+                        message?.payload?.let { payload ->
+                            val jsonElement = Json.parseToJsonElement(String(payload)).jsonObject
+
+                            val hasIntervalShot = "interval_shot" in jsonElement
+                            val hasInterval = "interval" in jsonElement
+                            val hasWarningMail = "warning_mail" in jsonElement
+                            val hasMailAddr = "mail_addr" in jsonElement
+
+                            println("interval_shot exists: $hasIntervalShot")
+                            println("interval exists: $hasInterval")
+                            println("warning_mail exists: $hasWarningMail")
+                            println("mail_addr exists: $hasMailAddr")
+
+                            try {
+                                val setting = Json.decodeFromJsonElement<Setting>(jsonElement)
+                                println(setting)
+
+                                if(hasIntervalShot) {
+                                    runOnUiThread {
+                                        val cbIntervalEn = findViewById<CheckBox>(R.id.checkBox_intervalShot)
+                                        cbIntervalEn.isChecked = setting.interval_shot
+                                    }
+                                    println("interval_shot: " + setting.interval_shot.toString())
+                                }
+                                if(hasInterval) {
+                                    runOnUiThread {
+                                        val txtIntervalTime = findViewById<EditText>(R.id.editTextNumber)
+                                        txtIntervalTime.setText(setting.interval.toString())
+                                    }
+                                    println("interval: " + setting.interval.toString())
+                                }
+                                if(hasWarningMail) {
+                                    runOnUiThread {
+                                        val cbWarningMainEn = findViewById<CheckBox>(R.id.checkBox_warnMail)
+                                        cbWarningMainEn.isChecked = setting.warning_mail
+                                    }
+                                    println("warning_mail: " + setting.warning_mail.toString())
+                                }
+                                if(hasMailAddr) {
+                                    runOnUiThread {
+                                        val txtMailAddr = findViewById<EditText>(R.id.editMailAddr)
+                                        txtMailAddr.setText(setting.mail_addr)
+                                    }
+                                    println("mail_addr: " + setting.mail_addr.toString())
+                                }
+                            } catch (e: SerializationException) {
+                                e.printStackTrace()
+                            }
+                        }
                     } else {
                         // Unknown message
                     }
@@ -130,6 +182,7 @@ class MainActivity : AppCompatActivity() {
                     // start subscribe image data
                     subscribe(topicEsp32CamImage)
                     subscribe(topicEsp32CurSetting)
+                    reqCurrentSettings()
                 }
 
                 override fun onFailure(asyncActionToken: IMqttToken?, exception: Throwable?) {
@@ -228,6 +281,11 @@ class MainActivity : AppCompatActivity() {
         textView.text = outputFormat.format(date)
     }
 
+    private fun reqCurrentSettings() {
+        publish(topicEsp32CamControl, "{ \"reqset\" : true }")
+        publish(topicEsp32SvrControl, "{ \"reqset\" : true }")
+    }
+
     // Listener
     private inner class ShotButtonListerner : View.OnClickListener {
         override fun onClick(view: View) {
@@ -280,4 +338,12 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
+    @Serializable
+    data class Setting(
+        val interval_shot: Boolean = false,
+        val interval: Int = 10000,
+        val warning_mail: Boolean = false,
+        val mail_addr: String = "default@example.com"
+    )
 }

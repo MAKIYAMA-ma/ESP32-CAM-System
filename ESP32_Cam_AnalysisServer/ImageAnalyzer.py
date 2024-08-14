@@ -36,19 +36,24 @@ class mode_singleton:
     def set_mailer_to(self, addr: str):
         self.mailer.set_to(addr)
 
+    def get_mailer_to(self):
+        return self.mailer.get_to()
+
 
 class mqtt_task:
     client = None
     queue = None
 
     # MQTT parameters
-    host = '192.168.0.8'  # MQTT Broker
+    host = '192.168.1.5'  # MQTT Broker
+    # host = '192.168.0.8'  # MQTT Broker
     port = 1883  # MQTT Port
     topic_img = 'esp32-cam/img/raw'
     topic_sub = 'esp32-cam/server/#'
     topic_control = 'esp32-cam/server/control'
     topic_setting = 'esp32-cam/server/setting'
-    topic_pub = 'esp32-cam/img/analyzed'
+    topic_pub_img = 'esp32-cam/img/analyzed'
+    topic_pub_setting = 'esp32-cam/controller/setting'
     client_id = 'python-mqtt'
 
     def __init__(self, queue):
@@ -79,16 +84,24 @@ class mqtt_task:
 
             self.queue.put(filepath, timeout=1)
         elif msg.topic == self.topic_control:
-            # NOP
-            pass
+            received_data = json.loads(msg.payload)
+            if received_data.get("reqset", False):
+                self.publish_setting()
         elif msg.topic == self.topic_setting:
             mode = mode_singleton()
             received_data = json.loads(msg.payload)
             mode.set_waining_mail(received_data.get("warning_mail", True))
             mode.set_mailer_to(received_data.get("mail_addr"))
 
-    def publish(self, payload):
-        self.client.publish(self.topic_pub, payload=payload, qos=1, retain=False)
+    def publish_image(self, payload):
+        self.client.publish(self.topic_pub_img, payload=payload, qos=1, retain=False)
+
+    def publish_setting(self):
+        mode = mode_singleton()
+        payload = "{"
+        payload += "\"warning_mail\": " + ("true" if mode.get_waining_mail() else "false")
+        payload += ", \"mail_addr\" :\"" + mode.get_mailer_to() + "\" }"
+        self.client.publish(self.topic_pub_setting, payload=payload, qos=1, retain=False)
 
     def run(self):
         self.client.connect(self.host, port=self.port, keepalive=60)
@@ -226,7 +239,7 @@ class face_analyze_task:
 
                 if image_data is not None:
                     timestamp_bytedata = timestamp.replace('_', '').encode('utf-8')
-                    self.taskm.publish(timestamp_bytedata + image_data)
+                    self.taskm.publish_image(timestamp_bytedata + image_data)
         except KeyboardInterrupt:
             pass
 

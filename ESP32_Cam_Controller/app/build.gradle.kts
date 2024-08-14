@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    kotlin("plugin.serialization") version "1.9.0"
 }
 
 android {
@@ -46,6 +47,7 @@ dependencies {
     implementation("androidx.localbroadcastmanager:localbroadcastmanager:1.1.0")
     // implementation("org.eclipse.paho:org.eclipse.paho.android.service:1.1.1")
     // implementation("net.sinetstream:pahomqttandroid-bugfix:1.0.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
