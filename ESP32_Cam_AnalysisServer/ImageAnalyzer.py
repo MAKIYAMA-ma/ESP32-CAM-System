@@ -66,6 +66,7 @@ class mqtt_task:
         print('status {0}'.format(respons_code))
         client.subscribe(self.topic_sub)
         client.subscribe(self.topic_img)
+        self.publish_setting()
 
     # 受信したバイナリデータを output.jpg として保存する関数
     def on_message(self, client, userdata, msg):
