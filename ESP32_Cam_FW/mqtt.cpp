@@ -10,7 +10,8 @@ static void callback(char *topic, byte *payload, unsigned int length);
 
 // MQTTブローカー
 const char *mqtt_broker = "192.168.0.8";
-const char *pub_topic = "esp32-cam/img/raw";
+const char *pub_image_topic = "esp32-cam/img/raw";
+const char *pub_setting_topic = "esp32-cam/controller/setting";
 const char *sub_topic = "esp32-cam/board/#";
 //const char *control_topic = "esp32-cam/board/control";
 //const char *setting_topic = "esp32-cam/board/setting";
@@ -97,7 +98,26 @@ void pub_image(const byte *image_data, unsigned int length)
 {
     Serial.print("len:");
     Serial.println(length);
-    boolean result = client.publish(pub_topic, image_data, length);
+    boolean result = client.publish(pub_image_topic, image_data, length);
+    if(result) {
+        Serial.println("pub success");
+    } else {
+        Serial.println("pub fail");
+    }
+}
+
+void pub_setting(bool interval_shot, int64_t interval, bool human_sensor)
+{
+    String payload = "{ \"interval_shot\": ";
+    payload += interval_shot ? "true" : "false";
+    payload += ", \"interval\": ";
+    payload += String(interval);
+    payload += ", \"human_sensor\": ";
+    payload += human_sensor ? "true" : "false";
+    payload += " }";
+
+    Serial.println("payload: " + payload);
+    boolean result = client.publish(pub_setting_topic, payload.c_str());
     if(result) {
         Serial.println("pub success");
     } else {

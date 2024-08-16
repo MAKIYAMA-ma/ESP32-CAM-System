@@ -170,6 +170,11 @@ void loop() {
                     Serial.println("disable human_sensor shot");
                 }
             }
+            if(doc.containsKey("reqset")) {
+                if(doc["reqset"]) {
+                    pub_setting(interval_shot, interval, human_sensor);
+                }
+            }
         }
     }
 

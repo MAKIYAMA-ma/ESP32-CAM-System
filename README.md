@@ -89,6 +89,7 @@ TODO setting about MQTT
 |---------------|-------------|--------------------------------------------------|
 | interval_shot | true/false  | enable/disable interval shot                     |
 | interval      | number (>0) | interval time [msec] for executing interval shot |
+| human_sensor  | true/false  | enable/disable human sensor                      |
 
 #### esp32-cam/board/control
 
@@ -115,5 +116,6 @@ TODO setting about MQTT
 |---------------|------------------|----------------------------------------------------------------------------------------------------------|
 | interval_shot | true/false       | enable/disable interval shot                                                                             |
 | interval      | number (>0)      | interval time [msec] for executing interval shot                                                         |
+| human_sensor  | true/false       | enable/disable human sensor                                                                              |
 | warning_mail  | true/false       | send image with e-mail if unknown faces have been detected<br>(and there is no face which is registered) |
 | mail_addr     | [address string] | destination email address to which warning email is sent                                                 |
