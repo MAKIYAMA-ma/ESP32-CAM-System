@@ -21,7 +21,9 @@
     #include "bluetooth.h"
 #endif
 
-#define CAPTURE_INTERVAL 10*1000  // once per 10 sec
+#define INI_INTERVAL_SHOT false
+#define INI_CAPTURE_INTERVAL 10*1000  // once per 10 sec
+#define INI_HUMAN_SENSOR false
 
 // ===================
 // Select camera model
@@ -107,6 +109,9 @@ void setup() {
 #ifdef USE_BLT_CMD
     bt_init();
 #endif
+
+    // publish initial settings
+    pub_setting(INI_INTERVAL_SHOT, INI_CAPTURE_INTERVAL, INI_HUMAN_SENSOR);
 }
 
 void loop() {
@@ -115,9 +120,9 @@ void loop() {
     static int64_t snap_cnt = 0;
     std::string rcvd_cmd;
     int64_t current_time;
-    static int64_t interval = CAPTURE_INTERVAL;
-    static bool interval_shot = false;
-    static bool human_sensor = false;
+    static int64_t interval = INI_CAPTURE_INTERVAL;
+    static bool interval_shot = INI_INTERVAL_SHOT;
+    static bool human_sensor = INI_HUMAN_SENSOR;
     bool capture = false;
 
     static int64_t latest_level = LOW;
