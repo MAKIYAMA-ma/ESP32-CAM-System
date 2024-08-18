@@ -45,8 +45,8 @@ class mqtt_task:
     queue = None
 
     # MQTT parameters
-    host = '192.168.1.5'  # MQTT Broker
-    # host = '192.168.0.8'  # MQTT Broker
+    # host = '192.168.1.5'  # MQTT Broker
+    host = '192.168.0.8'  # MQTT Broker
     port = 1883  # MQTT Port
     topic_img = 'esp32-cam/img/raw'
     topic_sub = 'esp32-cam/server/#'
