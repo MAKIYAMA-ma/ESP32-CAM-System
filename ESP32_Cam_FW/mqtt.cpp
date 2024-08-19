@@ -9,7 +9,8 @@
 static void callback(char *topic, byte *payload, unsigned int length);
 
 // MQTTブローカー
-const char *mqtt_broker = "192.168.0.8";
+const char *mqtt_broker = "test.mosquitto.org";
+/* const char *mqtt_broker = "192.168.0.8"; */
 const char *pub_image_topic = "esp32-cam/img/raw";
 const char *pub_setting_topic = "esp32-cam/controller/setting";
 const char *sub_topic = "esp32-cam/board/#";

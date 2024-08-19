@@ -45,8 +45,8 @@ class MainActivity : AppCompatActivity() {
         val cbWarningMainEn = findViewById<CheckBox>(R.id.checkBox_warnMail)
         cbWarningMainEn.isChecked = true
 
-        // val brokerUrl = "tcp://192.168.1.5:1883"
-        val brokerUrl = "tcp://192.168.0.8:1883"
+        val brokerUrl = "tcp://test.mosquitto.org:1883"
+        // val brokerUrl = "tcp://192.168.0.8:1883"
         val clientId = "ESP32-CAM-Controller"
         mqttClient = MqttAndroidClient(this, brokerUrl, clientId)
         mqttClient.setCallback(object : MqttCallbackExtended {
@@ -96,11 +96,13 @@ class MainActivity : AppCompatActivity() {
                             val hasInterval = "interval" in jsonElement
                             val hasWarningMail = "warning_mail" in jsonElement
                             val hasMailAddr = "mail_addr" in jsonElement
+                            val hasHumanSensor = "human_sensor" in jsonElement
 
                             println("interval_shot exists: $hasIntervalShot")
                             println("interval exists: $hasInterval")
                             println("warning_mail exists: $hasWarningMail")
                             println("mail_addr exists: $hasMailAddr")
+                            println("human_sensor exists: $hasHumanSensor")
 
                             try {
                                 val setting = Json.decodeFromJsonElement<Setting>(jsonElement)
@@ -133,6 +135,13 @@ class MainActivity : AppCompatActivity() {
                                         txtMailAddr.setText(setting.mail_addr)
                                     }
                                     println("mail_addr: " + setting.mail_addr.toString())
+                                }
+                                if(hasHumanSensor) {
+                                    runOnUiThread {
+                                        val cbHumansensorEn = findViewById<CheckBox>(R.id.checkBox_humanSensor)
+                                        cbHumansensorEn.isChecked = setting.human_sensor
+                                    }
+                                    println("human_sensor: " + setting.human_sensor.toString())
                                 }
                             } catch (e: SerializationException) {
                                 e.printStackTrace()
@@ -344,6 +353,7 @@ class MainActivity : AppCompatActivity() {
         val interval_shot: Boolean = false,
         val interval: Int = 10000,
         val warning_mail: Boolean = false,
-        val mail_addr: String = "default@example.com"
+        val mail_addr: String = "default@example.com",
+        val human_sensor: Boolean = false
     )
 }
