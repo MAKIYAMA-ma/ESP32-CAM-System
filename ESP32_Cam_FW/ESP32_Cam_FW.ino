@@ -10,6 +10,7 @@
 //#include "sd_read_write.h"
 //#include "SD_MMC.h"
 #include "mqtt.h"
+#include "lcd.h"
 #include <WiFi.h>
 #include <stdlib.h>
 #include <string>
@@ -109,6 +110,8 @@ void setup() {
 #ifdef USE_BLT_CMD
     bt_init();
 #endif
+
+    lcd_init();
 
     // publish initial settings
     pub_setting(INI_INTERVAL_SHOT, INI_CAPTURE_INTERVAL, INI_HUMAN_SENSOR);
