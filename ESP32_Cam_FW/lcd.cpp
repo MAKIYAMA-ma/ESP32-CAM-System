@@ -3,40 +3,72 @@
 #include <SPI.h>
 #include "lcd.h"
 
-//SPI0をコンストラクタに指定する
 Adafruit_ST7735 tft = Adafruit_ST7735(&SPI, TFT_CS, TFT_DC, TFT_RST);
 
 void lcd_init(void)
 {
-    /* SPI.setTX(TFT_MOSI);                        //H/W SPI 設定 */
-    /* SPI.setSCK(TFT_SCLK); */
-    pinMode(TFT_BL, OUTPUT);
-    pinMode(TFT_DC, OUTPUT);
-    pinMode(TFT_RST, OUTPUT);
-    SPI.begin();
+#if 1
+    Serial.println("start lcd init");
 
-    digitalWrite(TFT_BL, HIGH);
-    digitalWrite(TFT_DC, HIGH);
+    /* pinMode(TFT_BL,  OUTPUT); */
+    /* pinMode(TFT_DC,  OUTPUT); */
+    /* pinMode(TFT_RST, OUTPUT); */
+
+    /* digitalWrite(TFT_RST, HIGH); */
+    /* delay(50); */
+    /* digitalWrite(TFT_RST, LOW); */
+    /* delay(500); */
+    /* digitalWrite(TFT_RST, HIGH); */
+
+    /* Serial.println("LCD ON"); */
+    /* digitalWrite(TFT_BL,  HIGH); */
+    /* digitalWrite(TFT_DC,  HIGH); */
+
+    tft.initR(INITR_GREENTAB);
+    tft.fillScreen(ST77XX_BLACK);
+    /* tft.setRotation(1); */
+    /* tft.setTextWrap(false); */
+
+    tft.setTextSize(3);
+    tft.setCursor(5, 5);
+    tft.print("Ready...");
+    delay(3000);
+#else
+    Serial.println("start lcd init");
+
+    pinMode(TFT_BL,  OUTPUT);
+    pinMode(TFT_DC,  OUTPUT);
+    pinMode(TFT_RST, OUTPUT);
+
+    SPI.begin();  // SPIの初期化
+
+    // SPIトランザクションを開始
+    SPI.beginTransaction(SPISettings(24000000, MSBFIRST, SPI_MODE0));
+
+    digitalWrite(TFT_RST, HIGH);
+    delay(50);
+    digitalWrite(TFT_RST, LOW);
+    delay(500);
     digitalWrite(TFT_RST, HIGH);
 
-    tft.initR(INITR_BLACKTAB);                //Init ST7735S初期化
+    Serial.println("LCD ON");
+    digitalWrite(TFT_BL,  HIGH);
+    digitalWrite(TFT_DC,  HIGH);
 
-    tft.fillScreen(ST77XX_BLACK);               //背景の塗りつぶし
+    tft.initR(INITR_GREENTAB);  // 他のオプションも試してみてください: INITR_GREENTAB, INITR_REDTAB
 
-    //テキスト表示
-    tft.setRotation(3);                         //画面回転
-    tft.setTextSize(3);                         //サイズ
+    tft.fillScreen(ST77XX_BLACK);
 
-    tft.setCursor(0, 20);                      //カーソル位置
-    tft.setTextColor(ST77XX_RED);              //赤
+    tft.setRotation(0);  // 0, 1, 2も試してみてください
+    tft.setTextSize(3);
+
+    tft.setCursor(0, 20);
+    tft.setTextColor(ST77XX_RED);
     tft.printf("TAMANEGI\n");
 
-    tft.setTextColor(ST77XX_GREEN);            //緑
-    tft.printf("TAMANEGI\n");
+    // SPIトランザクションを終了
+    SPI.endTransaction();
 
-    tft.setTextColor(ST77XX_BLUE);             //青
-    tft.printf("TAMANEGI\n");
-
-    tft.setTextColor(ST77XX_YELLOW);           //黄
-    tft.printf("TAMANEGI\n");
+    Serial.println("LCD text displayed");
+#endif
 }
