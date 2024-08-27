@@ -1,7 +1,7 @@
 #ifndef _LCD_H_
 #define _LCD_H_
 
-#define TFT_BL   14 // BL
+#define TFT_BL   32 //14 // BL
 #define TFT_DC   25 // DC
 #define TFT_CS   5  // CS
 #define TFT_SCLK 18 // Clock

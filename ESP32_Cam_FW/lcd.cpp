@@ -3,14 +3,16 @@
 #include <SPI.h>
 #include "lcd.h"
 
-Adafruit_ST7735 tft = Adafruit_ST7735(&SPI, TFT_CS, TFT_DC, TFT_RST);
+SPIClass hspi(HSPI);
+Adafruit_ST7735 tft = Adafruit_ST7735(&hspi, TFT_CS, TFT_DC, TFT_RST);
+/* Adafruit_ST7735 tft = Adafruit_ST7735(&SPI, TFT_CS, TFT_DC, TFT_RST); */
 
 void lcd_init(void)
 {
 #if 1
     Serial.println("start lcd init");
 
-    /* pinMode(TFT_BL,  OUTPUT); */
+    pinMode(TFT_BL,  OUTPUT);
     /* pinMode(TFT_DC,  OUTPUT); */
     /* pinMode(TFT_RST, OUTPUT); */
 
@@ -21,7 +23,7 @@ void lcd_init(void)
     /* digitalWrite(TFT_RST, HIGH); */
 
     /* Serial.println("LCD ON"); */
-    /* digitalWrite(TFT_BL,  HIGH); */
+    digitalWrite(TFT_BL,  HIGH);
     /* digitalWrite(TFT_DC,  HIGH); */
 
     tft.initR(INITR_GREENTAB);
@@ -30,6 +32,7 @@ void lcd_init(void)
     /* tft.setTextWrap(false); */
 
     tft.setTextSize(3);
+    tft.setTextColor(ST77XX_RED);
     tft.setCursor(5, 5);
     tft.print("Ready...");
     delay(3000);
