@@ -48,7 +48,7 @@
 #define SD_MMC_CLK 14 //Please do not modify it.
 #define SD_MMC_D0  2  //Please do not modify it.
 
-#define HUMAN_SENSOR  13
+#define HUMAN_SENSOR  33
 // #define HIGH 1
 // #define LOW  0
 

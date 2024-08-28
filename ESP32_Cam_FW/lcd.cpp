@@ -3,9 +3,12 @@
 #include <SPI.h>
 #include "lcd.h"
 
+#if (TFT_SPI == TFT_SPI_VSPI)
+Adafruit_ST7735 tft = Adafruit_ST7735(&SPI, TFT_CS, TFT_DC, TFT_RST);
+#elif (TFT_SPI == TFT_SPI_HSPI)
 SPIClass hspi(HSPI);
 Adafruit_ST7735 tft = Adafruit_ST7735(&hspi, TFT_CS, TFT_DC, TFT_RST);
-/* Adafruit_ST7735 tft = Adafruit_ST7735(&SPI, TFT_CS, TFT_DC, TFT_RST); */
+#endif
 
 void lcd_init(void)
 {
@@ -28,7 +31,7 @@ void lcd_init(void)
 
     tft.initR(INITR_GREENTAB);
     tft.fillScreen(ST77XX_BLACK);
-    /* tft.setRotation(1); */
+    tft.setRotation(3);
     /* tft.setTextWrap(false); */
 
     tft.setTextSize(3);
