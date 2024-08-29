@@ -67,6 +67,7 @@ Pin assign of ESP32 is as follows.
 <br><img src="./ESP32_pinassign.png" width="100%">
 
 3. Used devices
+
 Devices to connect are following.
 - TFT Display Module : WINGONEER 1.8inch TFT LCD Display Module ST7735S
 - Motion sensor : HC-SR501

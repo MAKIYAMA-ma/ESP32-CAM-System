@@ -12,69 +12,33 @@ Adafruit_ST7735 tft = Adafruit_ST7735(&hspi, TFT_CS, TFT_DC, TFT_RST);
 
 void lcd_init(void)
 {
-#if 1
     Serial.println("start lcd init");
 
-    pinMode(TFT_BL,  OUTPUT);
-    /* pinMode(TFT_DC,  OUTPUT); */
-    /* pinMode(TFT_RST, OUTPUT); */
-
-    /* digitalWrite(TFT_RST, HIGH); */
-    /* delay(50); */
-    /* digitalWrite(TFT_RST, LOW); */
-    /* delay(500); */
-    /* digitalWrite(TFT_RST, HIGH); */
-
-    /* Serial.println("LCD ON"); */
-    digitalWrite(TFT_BL,  HIGH);
-    /* digitalWrite(TFT_DC,  HIGH); */
-
-    tft.initR(INITR_GREENTAB);
-    tft.fillScreen(ST77XX_BLACK);
-    tft.setRotation(3);
-    /* tft.setTextWrap(false); */
-
-    tft.setTextSize(3);
-    tft.setTextColor(ST77XX_RED);
-    tft.setCursor(5, 5);
-    tft.print("Ready...");
-    delay(3000);
-#else
-    Serial.println("start lcd init");
-
+    digitalWrite(TFT_RST, LOW);
+    digitalWrite(TFT_BL,  LOW);
     pinMode(TFT_BL,  OUTPUT);
     pinMode(TFT_DC,  OUTPUT);
     pinMode(TFT_RST, OUTPUT);
 
-    SPI.begin();  // SPIの初期化
-
-    // SPIトランザクションを開始
-    SPI.beginTransaction(SPISettings(24000000, MSBFIRST, SPI_MODE0));
-
-    digitalWrite(TFT_RST, HIGH);
-    delay(50);
-    digitalWrite(TFT_RST, LOW);
     delay(500);
     digitalWrite(TFT_RST, HIGH);
-
-    Serial.println("LCD ON");
     digitalWrite(TFT_BL,  HIGH);
-    digitalWrite(TFT_DC,  HIGH);
 
-    tft.initR(INITR_GREENTAB);  // 他のオプションも試してみてください: INITR_GREENTAB, INITR_REDTAB
-
+    tft.initR(INITR_BLACKTAB);
     tft.fillScreen(ST77XX_BLACK);
+    tft.setRotation(3);
+    /* tft.setTextWrap(false); */
 
-    tft.setRotation(0);  // 0, 1, 2も試してみてください
-    tft.setTextSize(3);
+    tft.setTextSize(1);
+    tft.setTextColor(ST77XX_WHITE);
+    tft.setCursor(5, 5);
+    tft.print("Ready...");
+    delay(3000);
+}
 
-    tft.setCursor(0, 20);
-    tft.setTextColor(ST77XX_RED);
-    tft.printf("TAMANEGI\n");
-
-    // SPIトランザクションを終了
-    SPI.endTransaction();
-
-    Serial.println("LCD text displayed");
-#endif
+void lcd_setText(String txt)
+{
+    tft.fillScreen(ST77XX_BLACK);
+    tft.setCursor(5, 5);
+    tft.print(txt);
 }

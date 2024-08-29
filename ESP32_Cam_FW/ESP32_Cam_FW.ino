@@ -212,6 +212,7 @@ void loop() {
 
         if(camera_capture(&buf, &data_size) == ESP_OK) {
             Serial.printf("Captured[%d][%d Bytes]\n", snap_cnt, data_size);
+            lcd_setText("capture:[" + String(snap_cnt) + "]");
 #ifdef SAVE_IMAGE_TO_SDCARD
             char filename[32] = "";
             sprintf(filename, "/capture_%d.jpg", snap_cnt);

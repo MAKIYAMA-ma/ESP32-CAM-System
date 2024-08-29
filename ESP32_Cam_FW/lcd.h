@@ -21,5 +21,6 @@
 #endif
 
 void lcd_init(void);
+void lcd_setText(String txt);
 
 #endif // _LCD_H_
