@@ -54,6 +54,7 @@ class mqtt_task:
     topic_setting = 'esp32-cam/server/setting'
     topic_pub_img = 'esp32-cam/img/analyzed'
     topic_pub_setting = 'esp32-cam/controller/setting'
+    topic_pub_control = 'esp32-cam/board/control'
     client_id = 'python-mqtt'
 
     def __init__(self, queue):
@@ -103,6 +104,10 @@ class mqtt_task:
         payload += "\"warning_mail\": " + ("true" if mode.get_waining_mail() else "false")
         payload += ", \"mail_addr\" :\"" + mode.get_mailer_to() + "\" }"
         self.client.publish(self.topic_pub_setting, payload=payload, qos=1, retain=False)
+
+    def publish_text(self, text: str):
+        payload = "{ \"text\" :\"" + text + "\" }"
+        self.client.publish(self.topic_pub_control, payload=payload, qos=1, retain=False)
 
     def run(self):
         self.client.connect(self.host, port=self.port, keepalive=60)
@@ -224,13 +229,16 @@ class face_analyze_task:
                     # 登録されている人が混じっているならOKとする
                     if max_sim > 0.35:
                         print("Registerd person detected[" + str(sims) + "]")
+                        self.taskm.publish_text("[" + timestamp + "] Registerd person detected")
                     else:
                         msg = "NOT registerd person detected[" + str(sims) + "]\n"
                         msg = msg + "time:" + timestamp
                         print(msg)
+                        self.taskm.publish_text("[" + timestamp + "] NOT registerd person detected")
                         if mode.get_waining_mail():
                             mode.get_mailer().main("UNKNWON person was detected!!", msg, file_to_send)
                 else:
+                    self.taskm.publish_text("[" + timestamp + "] No person detected")
                     print("No person detected")
 
                 # send via MQTT

@@ -183,6 +183,9 @@ void loop() {
                     pub_setting(interval_shot, interval, human_sensor);
                 }
             }
+            if(doc.containsKey("text")) {
+                lcd_setText(doc["text"]);
+            }
         }
     }
 

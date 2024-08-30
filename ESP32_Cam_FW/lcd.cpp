@@ -29,7 +29,7 @@ void lcd_init(void)
     tft.setRotation(3);
     /* tft.setTextWrap(false); */
 
-    tft.setTextSize(1);
+    tft.setTextSize(2);
     tft.setTextColor(ST77XX_WHITE);
     tft.setCursor(5, 5);
     tft.print("Ready...");

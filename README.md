@@ -139,10 +139,11 @@ TODO setting about MQTT
 
 #### esp32-cam/board/control
 
-| key    | value | note                     |
-|--------|-------|--------------------------|
-| shot   | true  | take onetime capture     |
-| reqset | true  | require current settings |
+| key    | value  | note                     |
+|--------|--------|--------------------------|
+| shot   | true   | take onetime capture     |
+| reqset | true   | require current settings |
+| text   | string | text to show on the TFT  |
 
 #### esp32-cam/server/setting
 
