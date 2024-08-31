@@ -3,25 +3,35 @@
 #include "wifi_setting.h"
 #include "command_receiver.h"
 #include <string.h>
+#include <stdlib.h>
+#include "config.h"
 
 // #define MQTT_MAX_PACKET_SIZE 8192
 
 static void callback(char *topic, byte *payload, unsigned int length);
 
 // MQTTブローカー
-const char *mqtt_broker = "test.mosquitto.org";
-/* const char *mqtt_broker = "192.168.0.8"; */
+/* const char *mqtt_broker = "test.mosquitto.org"; */
+const char *mqtt_broker = "192.168.0.8";
 const char *pub_image_topic = "esp32-cam/img/raw";
 const char *pub_setting_topic = "esp32-cam/controller/setting";
 const char *sub_topic = "esp32-cam/board/#";
-//const char *control_topic = "esp32-cam/board/control";
-//const char *setting_topic = "esp32-cam/board/setting";
+const char *control_topic = "esp32-cam/board/control";
+const char *setting_topic = "esp32-cam/board/setting";
+const char *image_topic = "esp32-cam/img/analyzed";
 const char *mqtt_username = "testuser";
 const char *mqtt_password = "testpass";
 const int mqtt_port = 1883;
 const int payload_max_size = 10240;
 
 CommandFIFO fifo(8);
+
+#if (SHOW_RESULT == SHOW_IMG)
+#define TIMESTAMP_LEN 14
+uint8_t *img_data = NULL;
+size_t  img_data_size;
+#endif
+
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -73,26 +83,58 @@ void mqtt_init()
     // test
     // client.publish(topic, "Hello world from ESP32");
     client.subscribe(sub_topic);
+    client.subscribe(image_topic);
 }
 
 static void callback(char *topic, byte *payload, unsigned int length)
 {
     Serial.print("Message is received:");
     Serial.println(topic);
-    Serial.print("Payload:");
-    for (int i = 0; i < length; i++) {
-        Serial.print((char)payload[i]);
+
+    if(!strcmp(image_topic, topic)) {
+#if (SHOW_RESULT == SHOW_IMG)
+        img_data_size = length - TIMESTAMP_LEN;
+        if(img_data != NULL) {
+            free(img_data);
+        }
+        img_data = (uint8_t *)malloc(img_data_size);
+        if(img_data != NULL) {
+            memcpy(img_data, payload + TIMESTAMP_LEN, img_data_size);
+        }
+#endif
+    } else {
+        Serial.print("Payload:");
+        for (int i = 0; i < length; i++) {
+            Serial.print((char)payload[i]);
+        }
+        std::string result((char *)payload, (int)length);
+        // TODO topicによる切り分けとかどうしようか
+        fifo.enqueue(result);
+        Serial.println();
+        Serial.println("-----------------------");
     }
-    std::string result((char *)payload, (int)length);
-    // TODO topicによる切り分けとかどうしようか
-    fifo.enqueue(result);
-    Serial.println();
-    Serial.println("-----------------------");
 }
 
 std::string mqtt_get_command()
 {
     return fifo.dequeue();
+}
+
+uint8_t *mqtt_get_img()
+{
+    return img_data;
+}
+
+size_t mqtt_get_img_size()
+{
+    return img_data_size;
+}
+
+void mqtt_del_img()
+{
+    free(img_data);
+    img_data = NULL;
+    img_data_size = 0;
 }
 
 void pub_image(const byte *image_data, unsigned int length)
@@ -138,6 +180,7 @@ void mqtt_task(void)
         if (client.connect(client_id.c_str())) {
             Serial.println("Succes to connect MQTT Broker");
             client.subscribe(sub_topic);
+            client.subscribe(image_topic);
             client.loop();
         } else {
             Serial.print("Fail to connect MQTT Broker:");

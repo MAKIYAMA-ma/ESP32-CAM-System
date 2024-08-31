@@ -15,9 +15,8 @@
 #include <stdlib.h>
 #include <string>
 #include <ArduinoJson.h>
+#include "config.h"
 
-#undef SAVE_IMAGE_TO_SDCARD
-#undef USE_BLT_CMD
 #ifdef USE_BLT_CMD
     #include "bluetooth.h"
 #endif
@@ -122,6 +121,8 @@ void loop() {
     int64_t i;
     static int64_t snap_cnt = 0;
     std::string rcvd_cmd;
+    uint8_t *rcvd_img;
+    size_t rcvd_img_size;
     int64_t current_time;
     static int64_t interval = INI_CAPTURE_INTERVAL;
     static bool interval_shot = INI_INTERVAL_SHOT;
@@ -183,11 +184,22 @@ void loop() {
                     pub_setting(interval_shot, interval, human_sensor);
                 }
             }
+#if (SHOW_RESULT == SHOW_TEXT)
             if(doc.containsKey("text")) {
                 lcd_setText(doc["text"]);
             }
+#endif
         }
     }
+
+#if (SHOW_RESULT == SHOW_IMG)
+    rcvd_img = mqtt_get_img();
+    if(rcvd_img != NULL) {
+        rcvd_img_size = mqtt_get_img_size();
+        lcd_displayBmp(rcvd_img, rcvd_img_size);
+        mqtt_del_img();
+    }
+#endif
 
     if(interval_shot) {
         current_time = esp_timer_get_time();

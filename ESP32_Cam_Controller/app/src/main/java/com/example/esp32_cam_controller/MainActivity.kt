@@ -45,8 +45,8 @@ class MainActivity : AppCompatActivity() {
         val cbWarningMainEn = findViewById<CheckBox>(R.id.checkBox_warnMail)
         cbWarningMainEn.isChecked = true
 
-        val brokerUrl = "tcp://test.mosquitto.org:1883"
-        // val brokerUrl = "tcp://192.168.0.8:1883"
+        // val brokerUrl = "tcp://test.mosquitto.org:1883"
+        val brokerUrl = "tcp://192.168.0.8:1883"
         val clientId = "ESP32-CAM-Controller"
         mqttClient = MqttAndroidClient(this, brokerUrl, clientId)
         mqttClient.setCallback(object : MqttCallbackExtended {
