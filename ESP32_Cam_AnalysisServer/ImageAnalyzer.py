@@ -1,17 +1,19 @@
 # coding: UTF-8
-import paho.mqtt.client as mqtt
-from datetime import datetime, timezone, timedelta
-import os
-import numpy
-import cv2
-# import time
-from threading import Thread
-import queue
 # import compare_face
-from compare_face import Comparator
+# import time
 # import util
+from PIL import Image
+from compare_face import Comparator
+from datetime import datetime, timezone, timedelta
 from notification import Mailer
+from threading import Thread
+import cv2
+import io
 import json
+import numpy
+import os
+import paho.mqtt.client as mqtt
+import queue
 
 
 class mode_singleton:
@@ -199,6 +201,24 @@ class face_analyze_task:
 
         return (len(faces) != 0)
 
+    def change_bmp_img(self, jpg_image):
+        # バイナリデータをBytesIOに変換
+        image_stream = io.BytesIO(jpg_image)
+
+        # JPEGイメージを開く
+        image = Image.open(image_stream)
+
+        # 16ビットカラーに変換
+        # 16ビットカラー (RGB565) の代わりに、Pillowは 8 ビットチャンネルごとの RGB に変換しますが、
+        # これを疑似的に 16 ビットカラー相当として扱います。
+        image = image.convert("RGB")
+
+        bmp_data = io.BytesIO()
+        image.save(bmp_data, format="BMP")
+        bmp_data = bmp_data.getvalue()
+
+        return bmp_data
+
     def run(self):
         try:
             comparotor = Comparator()
@@ -244,7 +264,12 @@ class face_analyze_task:
                 # send via MQTT
                 image_data = None
                 with open(file_to_send, "rb") as image_file:
-                    image_data = image_file.read()
+                    if False:
+                        # send as jpeg
+                        image_data = image_file.read()
+                    else:
+                        # send as bmp
+                        image_data = self.change_bmp_img(image_file.read())
 
                 if image_data is not None:
                     timestamp_bytedata = timestamp.replace('_', '').encode('utf-8')
