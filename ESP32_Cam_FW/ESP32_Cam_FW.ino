@@ -196,7 +196,8 @@ void loop() {
     rcvd_img = mqtt_get_img();
     if(rcvd_img != NULL) {
         rcvd_img_size = mqtt_get_img_size();
-        lcd_displayBmp(rcvd_img, rcvd_img_size);
+        lcd_displayJpg(rcvd_img, rcvd_img_size);
+        //lcd_displayBmp(rcvd_img, rcvd_img_size);
         mqtt_del_img();
     }
 #endif

@@ -23,5 +23,6 @@
 void lcd_init(void);
 void lcd_setText(String txt);
 void lcd_displayBmp(uint8_t* imageData, int length);
+void lcd_displayJpg(uint8_t* imageData, int length);
 
 #endif // _LCD_H_
