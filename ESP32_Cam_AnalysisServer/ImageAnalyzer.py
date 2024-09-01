@@ -264,7 +264,7 @@ class face_analyze_task:
                 # send via MQTT
                 image_data = None
                 with open(file_to_send, "rb") as image_file:
-                    if False:
+                    if True:
                         # send as jpeg
                         image_data = image_file.read()
                     else:
