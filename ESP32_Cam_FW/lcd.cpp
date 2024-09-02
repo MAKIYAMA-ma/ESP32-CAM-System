@@ -100,7 +100,7 @@ void lcd_displayBmp(uint8_t* imageData, int length)
 /*     } */
 /* } */
 
-#define DEBUG_MODE 0
+#define DEBUG_MODE 1
 #if (DEBUG_MODE == 2)
 // RGB565形式のカラー定義
 enum ColorRGB565 {
@@ -114,8 +114,6 @@ enum ColorRGB565 {
 void lcd_displayJpg(uint8_t* imageData, int length)
 {
 #if (DEBUG_MODE == 1)
-    // TODOイメージサイズがオーバーしている
-    //
     // バイト配列からJPEGをデコード
     JpegDec.decodeArray(imageData, length);
 
@@ -124,10 +122,13 @@ void lcd_displayJpg(uint8_t* imageData, int length)
     int imgWidth = JpegDec.width;
     int imgHeight = JpegDec.height;
 
+    Serial.printf("image_size : %d x %d\n", imgWidth, imgHeight);
+
     // デコードした画像の表示
-    for (int y = 0; y < imgHeight; y++) {
-        for (int x = 0; x < imgWidth; x++) {
-            int color = pImg[y * imgWidth + x];
+    for (int y = 0; y < TFT_HEIGHT; y++) {
+        for (int x = 0; x < TFT_WIDTH; x++) {
+            uint16_t color = pImg[y * imgHeight + x];
+            /* Serial.printf("draw(%d, %d) <- (%d, %d)\n", tgtX, tgtY, x, y); */
             tft.drawPixel(x, y, color);
         }
     }
@@ -179,18 +180,20 @@ void lcd_displayJpg(uint8_t* imageData, int length)
 
     // デコードした画像の表示
     tgtY = 0;
-    for (int y = 0; y < imgHeight; y++) {
+    for (int y = 0; y < TFT_HEIGHT; y++) {
+    /* for (int y = 0; y < imgHeight; y++) { */
         if(y % rate) {
             continue;
         }
         tgtX = 0;
-        for (int x = 0; x < imgWidth; x++) {
+        for (int x = 0; x < TFT_WIDTH; x++) {
+        /* for (int x = 0; x < imgWidth; x++) { */
             /* Serial.printf("x, y : (%d, %d)\n", x, y); */
             if(x % rate) {
                 continue;
             }
-            int color = pImg[y * imgHeight + x];
-            Serial.printf("draw(%d, %d) <- (%d, %d)\n", tgtX, tgtY, x, y);
+            uint16_t color = pImg[y * imgHeight + x];
+            /* Serial.printf("draw(%d, %d) <- (%d, %d)\n", tgtX, tgtY, x, y); */
             tft.drawPixel(tgtX, tgtY, color);
             tgtX++;
         }
