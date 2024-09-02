@@ -11,6 +11,8 @@ SPIClass hspi(HSPI);
 Adafruit_ST7735 tft = Adafruit_ST7735(&hspi, TFT_CS, TFT_DC, TFT_RST);
 #endif
 
+#define TFT_WIDTH   160 // TFTのドット数
+#define TFT_HEIGHT  128 // TFTのドット数
 
 /* 撮影データの処理に関するパラメータ定義 */
 #define BMPIMAGE_OFFSET  54  // BMPヘッダーのサイズ（通常は54バイト）
@@ -98,8 +100,22 @@ void lcd_displayBmp(uint8_t* imageData, int length)
 /*     } */
 /* } */
 
+#define DEBUG_MODE 0
+#if (DEBUG_MODE == 2)
+// RGB565形式のカラー定義
+enum ColorRGB565 {
+    WHITE = 0xFFFF, // 11111 111111 11111
+    RED   = 0xF800, // 11111 000000 00000
+    GREEN = 0x07E0, // 00000 111111 00000
+    BLUE  = 0x001F, // 00000 000000 11111
+    BLACK = 0x0000  // 00000 000000 00000
+};
+#endif
 void lcd_displayJpg(uint8_t* imageData, int length)
 {
+#if (DEBUG_MODE == 1)
+    // TODOイメージサイズがオーバーしている
+    //
     // バイト配列からJPEGをデコード
     JpegDec.decodeArray(imageData, length);
 
@@ -118,4 +134,70 @@ void lcd_displayJpg(uint8_t* imageData, int length)
 
     // デコード終了
     JpegDec.abort(); // メモリを解放}
+#elif (DEBUG_MODE == 2)
+    // Test code to check tft.drawPixel
+    int colors[] = {WHITE, RED, GREEN, BLUE, BLACK};
+    int colorIndex = 0;
+    const int numColors = sizeof(colors) / sizeof(colors[0]);
+
+    for (int y = 0; y < TFT_HEIGHT; y++) {
+        for (int x = 0; x < TFT_WIDTH; x++) {
+            int color = colors[colorIndex];
+            Serial.printf("x, y : (%d, %d)\n", x, y);
+            tft.drawPixel(x, y, color);
+            colorIndex = (colorIndex + 1) % numColors;
+        }
+    }
+#else
+    // バイト配列からJPEGをデコード
+    JpegDec.decodeArray(imageData, length);
+
+    // 画像情報を取得
+    uint16_t *pImg = JpegDec.pImage;
+    int imgWidth = JpegDec.width;
+    int imgHeight = JpegDec.height;
+    int tgtX, tgtY;
+
+    Serial.printf("image_size : %d x %d\n", imgWidth, imgHeight);
+    int rate = 1;
+    if(imgWidth > TFT_WIDTH) {
+        rate = (imgWidth / TFT_WIDTH);
+        if(imgWidth%TFT_WIDTH != 0) {
+            rate++;
+        }
+    }
+    if(imgHeight > TFT_HEIGHT) {
+        int rate_h = (imgHeight / TFT_HEIGHT);
+        if(imgHeight%TFT_HEIGHT != 0) {
+            rate_h++;
+        }
+        if(rate_h > rate) {
+            rate = rate_h;
+        }
+    }
+    Serial.printf("rate : %d\n", rate);
+
+    // デコードした画像の表示
+    tgtY = 0;
+    for (int y = 0; y < imgHeight; y++) {
+        if(y % rate) {
+            continue;
+        }
+        tgtX = 0;
+        for (int x = 0; x < imgWidth; x++) {
+            /* Serial.printf("x, y : (%d, %d)\n", x, y); */
+            if(x % rate) {
+                continue;
+            }
+            int color = pImg[y * imgHeight + x];
+            Serial.printf("draw(%d, %d) <- (%d, %d)\n", tgtX, tgtY, x, y);
+            tft.drawPixel(tgtX, tgtY, color);
+            tgtX++;
+        }
+        tgtY++;
+    }
+
+    // デコード終了
+    JpegDec.abort(); // メモリを解放}
+#endif
 }
