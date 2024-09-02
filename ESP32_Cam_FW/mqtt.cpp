@@ -93,13 +93,19 @@ static void callback(char *topic, byte *payload, unsigned int length)
 
     if(!strcmp(image_topic, topic)) {
 #if (SHOW_RESULT == SHOW_IMG)
-        img_data_size = length - TIMESTAMP_LEN;
-        if(img_data != NULL) {
-            free(img_data);
-        }
-        img_data = (uint8_t *)malloc(img_data_size);
-        if(img_data != NULL) {
-            memcpy(img_data, payload + TIMESTAMP_LEN, img_data_size);
+        if (length > TIMESTAMP_LEN) {
+            img_data_size = length - TIMESTAMP_LEN;
+            if (img_data != NULL) {
+                free(img_data);
+            }
+            img_data = (uint8_t *)malloc(img_data_size);
+            if (img_data != NULL) {
+                memcpy(img_data, payload + TIMESTAMP_LEN, img_data_size);
+            } else {
+                Serial.println("Memory allocation failed!");
+            }
+        } else {
+            Serial.println("Payload length is too short.");
         }
 #endif
     } else {
