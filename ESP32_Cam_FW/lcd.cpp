@@ -22,6 +22,7 @@ Adafruit_ST7735 tft = Adafruit_ST7735(&hspi, TFT_CS, TFT_DC, TFT_RST);
 /* ピクセルデータを保存するバッファ */
 /* uint16_t pixelBuffer[BMPIMAGE_WIDTH];  // 1ライン分のピクセルデータを格納するバッファ */
 
+static void printRGB565(uint16_t color);
 
 void lcd_init(void)
 {
@@ -100,7 +101,7 @@ void lcd_displayBmp(uint8_t* imageData, int length)
 /*     } */
 /* } */
 
-#define DEBUG_MODE 1
+#define DEBUG_MODE 0
 #if (DEBUG_MODE == 2)
 // RGB565形式のカラー定義
 enum ColorRGB565 {
@@ -127,9 +128,12 @@ void lcd_displayJpg(uint8_t* imageData, int length)
     // デコードした画像の表示
     for (int y = 0; y < TFT_HEIGHT; y++) {
         for (int x = 0; x < TFT_WIDTH; x++) {
-            uint16_t color = pImg[y * imgHeight + x];
-            /* Serial.printf("draw(%d, %d) <- (%d, %d)\n", tgtX, tgtY, x, y); */
+            Serial.printf("draw(%3d, %3d) -> [%5d]", x, y, y * imgWidth + x);
+            uint16_t color = pImg[y * imgWidth + x];
             tft.drawPixel(x, y, color);
+            Serial.printf(" : drawn[0x%04X(", color);
+            printRGB565(color);
+            Serial.printf(")]\n");
         }
     }
 
@@ -180,21 +184,24 @@ void lcd_displayJpg(uint8_t* imageData, int length)
 
     // デコードした画像の表示
     tgtY = 0;
-    for (int y = 0; y < TFT_HEIGHT; y++) {
-    /* for (int y = 0; y < imgHeight; y++) { */
+    /* for (int y = 0; y < TFT_HEIGHT; y++) { */
+    for (int y = 0; y < imgHeight; y++) {
         if(y % rate) {
             continue;
         }
         tgtX = 0;
-        for (int x = 0; x < TFT_WIDTH; x++) {
-        /* for (int x = 0; x < imgWidth; x++) { */
+        /* for (int x = 0; x < TFT_WIDTH; x++) { */
+        for (int x = 0; x < imgWidth; x++) {
             /* Serial.printf("x, y : (%d, %d)\n", x, y); */
             if(x % rate) {
                 continue;
             }
-            uint16_t color = pImg[y * imgHeight + x];
-            /* Serial.printf("draw(%d, %d) <- (%d, %d)\n", tgtX, tgtY, x, y); */
+            Serial.printf("draw(%3d, %3d) <- ((%3d, %3d) -> [%5d])", tgtX, tgtY, x, y, y * imgWidth + x);
+            uint16_t color = pImg[y * imgWidth + x];
             tft.drawPixel(tgtX, tgtY, color);
+            Serial.printf(" : drawn[0x%04X(", color);
+            printRGB565(color);
+            Serial.printf(")]\n");
             tgtX++;
         }
         tgtY++;
@@ -203,4 +210,20 @@ void lcd_displayJpg(uint8_t* imageData, int length)
     // デコード終了
     JpegDec.abort(); // メモリを解放}
 #endif
+}
+
+static void printRGB565(uint16_t color)
+{
+    // RGB565から各成分を取り出す
+    uint8_t red   = (color >> 11) & 0x1F;  // 5ビットのR成分
+    uint8_t green = (color >> 5)  & 0x3F;  // 6ビットのG成分
+    uint8_t blue  = color & 0x1F;          // 5ビットのB成分
+
+    // フルスケールに拡張 (0-255)
+    red = (red * 255) / 31;
+    green = (green * 255) / 63;
+    blue = (blue * 255) / 31;
+
+    // 結果を表示
+    Serial.printf("R: %3u, G: %3u, B: %3u", red, green, blue);
 }

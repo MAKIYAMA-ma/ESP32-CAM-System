@@ -18,7 +18,7 @@ const char *pub_setting_topic = "esp32-cam/controller/setting";
 const char *sub_topic = "esp32-cam/board/#";
 const char *control_topic = "esp32-cam/board/control";
 const char *setting_topic = "esp32-cam/board/setting";
-const char *image_topic = "esp32-cam/img/analyzed";
+const char *image_topic = "esp32-cam/img/analyzed_scale";
 const char *mqtt_username = "testuser";
 const char *mqtt_password = "testpass";
 const int mqtt_port = 1883;
@@ -28,6 +28,9 @@ CommandFIFO fifo(8);
 
 #if (SHOW_RESULT == SHOW_IMG)
 #define TIMESTAMP_LEN 14
+uint8_t *img_data = NULL;
+size_t  img_data_size;
+#elif (SHOW_RESULT == SHOW_IMG_SCALE)
 uint8_t *img_data = NULL;
 size_t  img_data_size;
 #endif
@@ -106,6 +109,17 @@ static void callback(char *topic, byte *payload, unsigned int length)
             }
         } else {
             Serial.println("Payload length is too short.");
+        }
+#elif (SHOW_RESULT == SHOW_IMG_SCALE)
+        img_data_size = length;
+        if (img_data != NULL) {
+            free(img_data);
+        }
+        img_data = (uint8_t *)malloc(img_data_size);
+        if (img_data != NULL) {
+            memcpy(img_data, payload, img_data_size);
+        } else {
+            Serial.println("Memory allocation failed!");
         }
 #endif
     } else {

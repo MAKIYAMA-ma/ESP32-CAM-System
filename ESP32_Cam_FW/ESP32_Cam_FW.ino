@@ -192,7 +192,7 @@ void loop() {
         }
     }
 
-#if (SHOW_RESULT == SHOW_IMG)
+#if ((SHOW_RESULT == SHOW_IMG) || (SHOW_RESULT == SHOW_IMG_SCALE))
     rcvd_img = mqtt_get_img();
     if(rcvd_img != NULL) {
         rcvd_img_size = mqtt_get_img_size();

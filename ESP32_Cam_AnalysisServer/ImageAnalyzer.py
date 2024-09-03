@@ -55,6 +55,7 @@ class mqtt_task:
     topic_control = 'esp32-cam/server/control'
     topic_setting = 'esp32-cam/server/setting'
     topic_pub_img = 'esp32-cam/img/analyzed'
+    topic_pub_img_scale = 'esp32-cam/img/analyzed_scale'
     topic_pub_setting = 'esp32-cam/controller/setting'
     topic_pub_control = 'esp32-cam/board/control'
     client_id = 'python-mqtt'
@@ -99,6 +100,9 @@ class mqtt_task:
 
     def publish_image(self, payload):
         self.client.publish(self.topic_pub_img, payload=payload, qos=1, retain=False)
+
+    def publish_image_scale(self, payload):
+        self.client.publish(self.topic_pub_img_scale, payload=payload, qos=1, retain=False)
 
     def publish_setting(self):
         mode = mode_singleton()
@@ -219,6 +223,19 @@ class face_analyze_task:
 
         return bmp_data
 
+    def resize_image(self, image_data, scale=0.5):
+        image = Image.open(io.BytesIO(image_data))
+
+        new_size = (int(image.width * scale), int(image.height * scale))
+
+        resized_image = image.resize(new_size, Image.ANTIALIAS)
+
+        img_byte_arr = io.BytesIO()
+        resized_image.save(img_byte_arr, format=image.format)
+        img_byte_arr = img_byte_arr.getvalue()
+
+        return img_byte_arr
+
     def run(self):
         try:
             comparotor = Comparator()
@@ -272,8 +289,10 @@ class face_analyze_task:
                         image_data = self.change_bmp_img(image_file.read())
 
                 if image_data is not None:
+                    resize_image_data = self.resize_image(image_data, scale=0.5)
                     timestamp_bytedata = timestamp.replace('_', '').encode('utf-8')
                     self.taskm.publish_image(timestamp_bytedata + image_data)
+                    self.taskm.publish_image_scale(resize_image_data)
         except KeyboardInterrupt:
             pass
 
