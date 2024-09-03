@@ -3,7 +3,9 @@
 #include <JPEGDecoder.h>
 #include <SPI.h>
 #include "lcd.h"
+#include "config.h"
 
+#ifndef SAVE_IMAGE_TO_SDCARD
 #if (TFT_SPI == TFT_SPI_VSPI)
 Adafruit_ST7735 tft = Adafruit_ST7735(&SPI, TFT_CS, TFT_DC, TFT_RST);
 #elif (TFT_SPI == TFT_SPI_HSPI)
@@ -227,3 +229,4 @@ static void printRGB565(uint16_t color)
     // 結果を表示
     Serial.printf("R: %3u, G: %3u, B: %3u", red, green, blue);
 }
+#endif

@@ -7,8 +7,6 @@
 **********************************************************************/
 #include "esp_camera.h"
 #include "esp_timer.h"
-//#include "sd_read_write.h"
-//#include "SD_MMC.h"
 #include "mqtt.h"
 #include "lcd.h"
 #include <WiFi.h>
@@ -16,6 +14,10 @@
 #include <string>
 #include <ArduinoJson.h>
 #include "config.h"
+#ifdef SAVE_IMAGE_TO_SDCARD
+#include "sd_read_write.h"
+#include "SD_MMC.h"
+#endif
 
 #ifdef USE_BLT_CMD
     #include "bluetooth.h"
@@ -110,7 +112,9 @@ void setup() {
     bt_init();
 #endif
 
+#ifndef SAVE_IMAGE_TO_SDCARD
     lcd_init();
+#endif
 
     // publish initial settings
     pub_setting(INI_INTERVAL_SHOT, INI_CAPTURE_INTERVAL, INI_HUMAN_SENSOR);
@@ -184,10 +188,12 @@ void loop() {
                     pub_setting(interval_shot, interval, human_sensor);
                 }
             }
+#ifndef SAVE_IMAGE_TO_SDCARD
 #if (SHOW_RESULT == SHOW_TEXT)
             if(doc.containsKey("text")) {
                 lcd_setText(doc["text"]);
             }
+#endif
 #endif
         }
     }
@@ -196,8 +202,14 @@ void loop() {
     rcvd_img = mqtt_get_img();
     if(rcvd_img != NULL) {
         rcvd_img_size = mqtt_get_img_size();
+#ifdef SAVE_IMAGE_TO_SDCARD
+        char filename[32] = "";
+        sprintf(filename, "/capture_%d.jpg", snap_cnt);
+        writeBinFile(SD_MMC, filename, rcvd_img, rcvd_img_size);
+#else
         lcd_displayJpg(rcvd_img, rcvd_img_size);
         //lcd_displayBmp(rcvd_img, rcvd_img_size);
+#endif
         mqtt_del_img();
     }
 #endif
@@ -228,7 +240,9 @@ void loop() {
 
         if(camera_capture(&buf, &data_size) == ESP_OK) {
             Serial.printf("Captured[%d][%d Bytes]\n", snap_cnt, data_size);
+#ifndef SAVE_IMAGE_TO_SDCARD
             lcd_setText("capture:[" + String(snap_cnt) + "]");
+#endif
 #ifdef SAVE_IMAGE_TO_SDCARD
             char filename[32] = "";
             sprintf(filename, "/capture_%d.jpg", snap_cnt);
