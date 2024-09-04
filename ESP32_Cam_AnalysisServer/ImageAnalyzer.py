@@ -255,16 +255,37 @@ class face_analyze_task:
             for x in range(width):
                 pixels[x, y] = color
 
+        image = self.change_to_rgb(image)
         img_byte_arr = io.BytesIO()
         image.save(img_byte_arr, format='JPEG')
-        image.save("./re1.jpg", format='JPEG')
-        image = image.convert("RGB")
-        image.save("./re2.jpg", format='JPEG')
-        image = image.convert("YCbCr")
-        image.save("./re3.jpg", format='JPEG')
         img_byte_arr = img_byte_arr.getvalue()
 
         return img_byte_arr
+
+    def change_to_rgb(self, image):
+        # YCbCrとして色情報を取得
+        ycbcr_image = image.convert("YCbCr")
+        y, cb, cr = ycbcr_image.split()
+
+        # Numpy配列に変換
+        y = numpy.array(y, dtype=numpy.float32)
+        cb = numpy.array(cb, dtype=numpy.float32) - 128
+        cr = numpy.array(cr, dtype=numpy.float32) - 128
+
+        # YCbCrからRGBへの変換
+        r = y + 1.402 * cr
+        g = y - 0.344136 * cb - 0.714136 * cr
+        b = y + 1.772 * cb
+
+        # RGBをクリップして範囲を[0, 255]に収める
+        r = numpy.clip(r, 0, 255).astype(numpy.uint8)
+        g = numpy.clip(g, 0, 255).astype(numpy.uint8)
+        b = numpy.clip(b, 0, 255).astype(numpy.uint8)
+
+        # RGB画像として結合
+        rgb_image = Image.merge("RGB", (Image.fromarray(r), Image.fromarray(g), Image.fromarray(b)))
+
+        return rgb_image
 
     def run(self):
         try:
