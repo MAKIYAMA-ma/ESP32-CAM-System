@@ -228,10 +228,40 @@ class face_analyze_task:
 
         new_size = (int(image.width * scale), int(image.height * scale))
 
-        resized_image = image.resize(new_size, Image.ANTIALIAS)
+        resized_image = image.resize(new_size, Image.LANCZOS)
 
         img_byte_arr = io.BytesIO()
         resized_image.save(img_byte_arr, format=image.format)
+        img_byte_arr = img_byte_arr.getvalue()
+
+        return img_byte_arr
+
+    def make_color_bar(self, width=160, height=120):
+        image = Image.new("RGB", (width, height))
+        pixels = image.load()
+
+        for y in range(height):
+            if (y // 10) % 5 == 0:
+                color = (255, 0,   0)    # Red
+            elif (y // 10) % 5 == 1:
+                color = (0,   255, 0)    # Green
+            elif (y // 10) % 5 == 2:
+                color = (0,   0,   255)  # Blue
+            elif (y // 10) % 5 == 3:
+                color = (0,   0,   0)    # Black
+            else:
+                color = (255, 255, 255)  # White
+
+            for x in range(width):
+                pixels[x, y] = color
+
+        img_byte_arr = io.BytesIO()
+        image.save(img_byte_arr, format='JPEG')
+        image.save("./re1.jpg", format='JPEG')
+        image = image.convert("RGB")
+        image.save("./re2.jpg", format='JPEG')
+        image = image.convert("YCbCr")
+        image.save("./re3.jpg", format='JPEG')
         img_byte_arr = img_byte_arr.getvalue()
 
         return img_byte_arr
@@ -289,7 +319,8 @@ class face_analyze_task:
                         image_data = self.change_bmp_img(image_file.read())
 
                 if image_data is not None:
-                    resize_image_data = self.resize_image(image_data, scale=0.5)
+                    # resize_image_data = self.resize_image(image_data, scale=0.5)
+                    resize_image_data = self.make_color_bar()
                     timestamp_bytedata = timestamp.replace('_', '').encode('utf-8')
                     self.taskm.publish_image(timestamp_bytedata + image_data)
                     self.taskm.publish_image_scale(resize_image_data)
