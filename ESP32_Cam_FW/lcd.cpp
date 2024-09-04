@@ -166,6 +166,10 @@ void lcd_displayJpg(uint8_t* imageData, int length)
     int tgtX, tgtY;
 
     Serial.printf("image_size : %d x %d\n", imgWidth, imgHeight);
+    Serial.printf("Number of components: %d\n", JpegDec.comps);
+
+    // TFTのサイズにもし収まらない場合は間引いて表示するため倍率を計算する
+    // 基本は1の画像を表示したい
     int rate = 1;
     if(imgWidth > TFT_WIDTH) {
         rate = (imgWidth / TFT_WIDTH);
@@ -186,13 +190,11 @@ void lcd_displayJpg(uint8_t* imageData, int length)
 
     // デコードした画像の表示
     tgtY = 0;
-    /* for (int y = 0; y < TFT_HEIGHT; y++) { */
     for (int y = 0; y < imgHeight; y++) {
         if(y % rate) {
             continue;
         }
         tgtX = 0;
-        /* for (int x = 0; x < TFT_WIDTH; x++) { */
         for (int x = 0; x < imgWidth; x++) {
             /* Serial.printf("x, y : (%d, %d)\n", x, y); */
             if(x % rate) {
