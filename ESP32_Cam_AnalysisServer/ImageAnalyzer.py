@@ -340,8 +340,8 @@ class face_analyze_task:
                         image_data = self.change_bmp_img(image_file.read())
 
                 if image_data is not None:
-                    # resize_image_data = self.resize_image(image_data, scale=0.5)
-                    resize_image_data = self.make_color_bar()
+                    resize_image_data = self.resize_image(image_data, scale=0.5)
+                    # resize_image_data = self.make_color_bar()
                     timestamp_bytedata = timestamp.replace('_', '').encode('utf-8')
                     self.taskm.publish_image(timestamp_bytedata + image_data)
                     self.taskm.publish_image_scale(resize_image_data)
