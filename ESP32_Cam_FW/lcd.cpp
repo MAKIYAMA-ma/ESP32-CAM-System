@@ -1,6 +1,7 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_ST7735.h>
-#include <JPEGDecoder.h>
+/* #include <JPEGDecoder.h> */
+#include <JPEGDEC.h>
 #include <SPI.h>
 #include "lcd.h"
 #include "config.h"
@@ -21,9 +22,12 @@ Adafruit_ST7735 tft = Adafruit_ST7735(&hspi, TFT_CS, TFT_DC, TFT_RST);
 #define BMPIMAGE_WIDTH   320 // 幅ピクセル数
 #define BMPIMAGE_HEIGHT  240 // 高さピクセル数
 
+JPEGDEC jpeg;
+
 /* ピクセルデータを保存するバッファ */
 /* uint16_t pixelBuffer[BMPIMAGE_WIDTH];  // 1ライン分のピクセルデータを格納するバッファ */
 
+static int drawCallback(JPEGDRAW *pDraw);
 static void printRGB565(uint16_t color);
 
 void lcd_init(void)
@@ -75,34 +79,48 @@ void lcd_displayBmp(uint8_t* imageData, int length)
     }
 }
 
-/* void lcd_displayJpg(uint8_t* imageData, int length) */
-/* { */
-/*     uint16_t color = 0xFFFF; */
+void lcd_displayJpg(uint8_t* imageData, int length)
+{
+    uint16_t color = 0xFFFF;
 
-/*     if (jpeg.openRAM(imageData, length, JPEGDraw)) { */
-/*         Serial.println("JPEG data open successful"); */
+    if (jpeg.openRAM(imageData, length, drawCallback)) {
+        Serial.println("JPEG data open successful");
 
-/*         jpeg.setPixelType(RGB565_BIG_ENDIAN); // RGB565形式でデコード */
-/*         tft.fillScreen(ST77XX_BLACK); */
-/*         for (int y = 0; y < BMPIMAGE_HEIGHT; y++) { */
-/*             for (int x = 0; x < BMPIMAGE_WIDTH; x++) { */
-/*                 if (jpeg.decode(x, y, 1)) { // 1ピクセルのみデコード */
-/*                     color = jpeg.pImage[y * jpeg.MCUWidth + x]; // デコードされたピクセルの色を取得 */
-/*                 } else { */
-/*                     color = 0xFFFF; */
-/*                 } */
-/*                 tft.drawPixel(x, y, color); */
+        jpeg.decode(0, 0, 0);
 
-/*                 Serial.printf("Pixel color at (%d, %d): 0x%04X\n", x, y, color); */
-/*             } */
-/*         } */
+        /* jpeg.setPixelType(RGB565_BIG_ENDIAN); // RGB565形式でデコード */
+        /* tft.fillScreen(ST77XX_BLACK); */
+        /* for (int y = 0; y < BMPIMAGE_HEIGHT; y++) { */
+        /*     for (int x = 0; x < BMPIMAGE_WIDTH; x++) { */
+        /*         if (jpeg.decode(x, y, 1)) { // 1ピクセルのみデコード */
+        /*             color = jpeg.pImage[y * jpeg.MCUWidth + x]; // デコードされたピクセルの色を取得 */
+        /*         } else { */
+        /*             color = 0xFFFF; */
+        /*         } */
+        /*         tft.drawPixel(x, y, color); */
 
-/*         jpeg.close(); */
-/*     } else { */
-/*         Serial.println("JPEG data open failed"); */
-/*     } */
-/* } */
+        /*         Serial.printf("Pixel color at (%d, %d): 0x%04X\n", x, y, color); */
+        /*     } */
+        /* } */
 
+        jpeg.close();
+    } else {
+        Serial.println("JPEG data open failed");
+    }
+}
+
+static int drawCallback(JPEGDRAW *pDraw)
+{
+    for (int y = 0; y < pDraw->iHeight; y++) {
+        for (int x = 0; x < pDraw->iWidth; x++) {
+            uint16_t color = pDraw->pPixels[y * pDraw->iWidth + x];
+            tft.drawPixel(pDraw->x + x, pDraw->y + y, color);
+        }
+    }
+    return 1;  // 1を返してデコードを継続
+}
+
+#if 0
 #define DEBUG_MODE 0
 #if (DEBUG_MODE == 2)
 // RGB565形式のカラー定義
@@ -215,6 +233,7 @@ void lcd_displayJpg(uint8_t* imageData, int length)
     JpegDec.abort(); // メモリを解放}
 #endif
 }
+#endif
 
 static void printRGB565(uint16_t color)
 {
